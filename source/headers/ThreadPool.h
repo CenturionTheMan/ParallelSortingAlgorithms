@@ -8,81 +8,41 @@
 class ThreadPool
 {
 private:
-    
+    /// @brief threads
     std::vector<std::thread> threads;
+
+    /// @brief tasks to do
     std::queue<std::function<void()>> tasks;
+
+    /// @brief mutex for tasks
     std::mutex tasksQueueMutex;
+
+    /// @brief condition variable for tasks
     std::condition_variable condition;
 
-    bool stopRequested = false;
+    /// @brief flags for force stop tasks
+    bool forceStop = false;
+
+    /// @brief flag for stop when empty
+    bool stopWhenEmpty = false;
 
 public:
+    /// @brief ctor
+    /// @param threadsAmount amount of threads to create
     ThreadPool(int threadsAmount = std::thread::hardware_concurrency());
+
+    /// @brief dtor
     ~ThreadPool();
+
+    /// @brief add task to queue
+    /// @param task task to add
+    void AddTask(std::function<void()> task);
+
+    /// @brief stop all threads (as soon as possible)
+    void StopAll();
+
+    /// @brief will freeze current thread until all tasks are done, will stop all threads
+    void WaitForAllAndStop();
 };
 
-ThreadPool::ThreadPool(int threadsAmount = std::thread::hardware_concurrency())
-{
-    //for each thread
-    for (int i = 0; i < threadsAmount; i++)
-    {
-        //create a thread
-        auto t = std::thread([this]() {
-            //run
-            while (true)
-            {
-                //lock stuff
-                std::unique_lock<std::mutex> lock(tasksQueueMutex);
 
-                //check id tasks available (additional check for stop request)
-                condition.wait(lock, [this]() 
-                { 
-                    return stopRequested || !tasks.empty(); 
-                });
-
-                //if stop requested - STOP
-                if (stopRequested) return;
-
-                //get task from queue
-                std::function<void()> task = tasks.front();
-
-                //remove task from queue
-                tasks.pop();
-
-                //unlock "lock", for other threads
-                lock.unlock();
-
-                //run task
-                task();
-            }
-        });
-
-        if(t.joinable())
-            t.detach();
-
-        //add thread to vector
-        threads.emplace_back(t);
-    }
-}
-
-ThreadPool::~ThreadPool()
-{
-    //lock stuff
-    std::unique_lock<std::mutex> lock(tasksQueueMutex);
-
-    //set stop request
-    stopRequested = true;
-
-    //notify all threads
-    condition.notify_all();
-
-    //unlock "lock", for other threads
-    lock.unlock();
-
-    //join all threads
-    for (auto &t : threads)
-    {
-        if(t.joinable())
-            t.join();
-    }
-}

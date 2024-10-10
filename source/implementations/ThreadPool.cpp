@@ -1,7 +1,9 @@
 #include "./../headers/ThreadPool.h"
 
-ThreadPool::ThreadPool(int threadsAmount)
+ThreadPool::ThreadPool(unsigned int threadsAmount)
 {
+    threadsAmount = std::min(threadsAmount, std::thread::hardware_concurrency() - 1);
+
     //for each thread
     for (int i = 0; i < threadsAmount; i++)
     {

@@ -1,31 +1,29 @@
+#pragma once
+
 #include <thread>
+#include <functional>
+#include "ThreadPool.h"
 
-namespace Thread
+
+class ParallelFor
 {
-    const int THREADS_AMOUNT = 2;
-    auto threads = new std::thread[THREADS_AMOUNT];
-    bool isInitialized = false;
+private:
+    std::unique_ptr<ThreadPool> pool;
+
+public:
+    ParallelFor(unsigned int threadsAmount = std::thread::hardware_concurrency() - 1);
+    ParallelFor(std::unique_ptr<ThreadPool> pool);
+    ~ParallelFor();
+
+    void Run(int from, int to, std::function<void(int)> func);
+    void RunAndWait(int from, int to, std::function<void(int)> func);
+
+    void RunDoubleDimension(int fromX, int toX, int fromY, int toY, std::function<void(int, int)> func);
+    void RunDoubleDimensionAndWait(int fromX, int toX, int fromY, int toY, std::function<void(int, int)> func);
+};
 
 
-    void ParallelFor(int amount, void (*func)(int* index))
-    {
-        for (int i = 0; i < amount; i++)
-        {
-            
-        }
-        
-    }
-
-    std::thread* GetFreeThread()
-    {
-        for (int i = 0; i < THREADS_AMOUNT; i++)
-        {
-            if (!threads[i].joinable())
-            {
-                return &threads[i];
-            }
-        }
-    }
 
 
-} // namespace Thread
+
+

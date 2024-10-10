@@ -1,3 +1,5 @@
+#pragma once
+
 #include <thread>
 #include <vector>
 #include <queue>
@@ -29,7 +31,7 @@ private:
 public:
     /// @brief ctor
     /// @param threadsAmount amount of threads to create
-    ThreadPool(int threadsAmount = std::thread::hardware_concurrency());
+    ThreadPool(unsigned int threadsAmount = std::thread::hardware_concurrency() - 1);
 
     /// @brief dtor
     ~ThreadPool();

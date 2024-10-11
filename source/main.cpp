@@ -33,7 +33,7 @@ void TestParallelFor()
     ParallelFor pf(10);
 
     auto start1 = std::chrono::high_resolution_clock::now();    
-    pf.RunAndWait(0, arrSize, [&arrRes1, &arr1, &arr2](int i) {
+    pf.RunAndWait(0, arrSize, 1, [&arrRes1, &arr1, &arr2](int i) {
         arrRes1[i] = arr1[i] + arr2[i];
     });
     auto end1 = std::chrono::high_resolution_clock::now();

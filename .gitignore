@@ -1,3 +1,5 @@
+
+
 # Created by https://www.toptal.com/developers/gitignore/api/windows,linux,macos,c++,python,cuda,visualstudiocode,visualstudio,clion,executable
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,linux,macos,c++,python,cuda,visualstudiocode,visualstudio,clion,executable
 
@@ -387,11 +389,9 @@ pyrightconfig.json
 
 ### VisualStudioCode ###
 .vscode/*
-!.vscode/settings.json
+
+## left task file for vs compilation
 !.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/*.code-snippets
 
 # Local History for Visual Studio Code
 .history/

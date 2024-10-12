@@ -45,6 +45,8 @@ public:
 
     /// @brief will freeze current thread until all tasks are done, will stop all threads
     void WaitForAllAndStop();
+
+    void WaitForAll();
 };
 
 

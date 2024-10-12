@@ -1,5 +1,10 @@
 #include "./../headers/ParallelFor.h"
 
+ParallelFor::ParallelFor(unsigned int threadsAmount)
+{
+    ParallelFor::pool = std::make_unique<ThreadPool>(threadsAmount);
+}
+
 ParallelFor::ParallelFor(std::unique_ptr<ThreadPool> pool)
 {
     ParallelFor::pool = std::move(pool);

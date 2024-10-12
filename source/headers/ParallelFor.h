@@ -11,7 +11,6 @@ private:
     std::unique_ptr<ThreadPool> pool;
 
 public:
-    ParallelFor(unsigned int threadsAmount = std::thread::hardware_concurrency() - 1);
     ParallelFor(std::unique_ptr<ThreadPool> pool);
     ~ParallelFor();
 

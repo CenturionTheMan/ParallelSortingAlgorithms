@@ -1,4 +1,4 @@
-#include "./../headers/ParallelFor.h"
+#include "ParallelFor.h"
 
 ParallelFor::ParallelFor(unsigned int threadsAmount)
 {
@@ -21,7 +21,7 @@ void ParallelFor::Run(int from, int to, int step, std::function<void(int)> func)
     {
         ParallelFor::pool->AddTask([func, i]() {
             func(i);
-        });
+            });
     }
 }
 
@@ -37,9 +37,9 @@ void ParallelFor::RunDoubleDimension(int fromI, int toI, int stepI, int fromJ, i
     {
         for (int j = fromJ; j < toJ; j++)
         {
-            ParallelFor::pool->AddTask([func, i, j](){
+            ParallelFor::pool->AddTask([func, i, j]() {
                 func(i, j);
-            });
+                });
         }
     }
 }

@@ -1,11 +1,11 @@
-#include "./../headers/ThreadPool.h"
+#include "ThreadPool.h"
 
 ThreadPool::ThreadPool(unsigned int threadsAmount)
 {
     threadsAmount = std::min(threadsAmount, std::thread::hardware_concurrency() - 1);
 
     //for each thread
-    for (int i = 0; i < threadsAmount; i++)
+    for (unsigned int i = 0; i < threadsAmount; i++)
     {
         //create a thread
         auto t = std::thread([this]() {
@@ -16,14 +16,14 @@ ThreadPool::ThreadPool(unsigned int threadsAmount)
                 std::unique_lock<std::mutex> lock(ThreadPool::tasksQueueMutex);
 
                 //check id tasks available (additional check for stop request)
-                ThreadPool::condition.wait(lock, [this]() 
-                { 
-                    return !ThreadPool::tasks.empty() || ThreadPool::forceStop || (ThreadPool::stopWhenEmpty && ThreadPool::tasks.empty()); 
-                });
+                ThreadPool::condition.wait(lock, [this]()
+                    {
+                        return !ThreadPool::tasks.empty() || ThreadPool::forceStop || (ThreadPool::stopWhenEmpty && ThreadPool::tasks.empty());
+                    });
 
                 //check if should stop
                 if (ThreadPool::forceStop) return;
-                if(ThreadPool::stopWhenEmpty && ThreadPool::tasks.empty()) return;
+                if (ThreadPool::stopWhenEmpty && ThreadPool::tasks.empty()) return;
 
                 //get task from queue
                 std::function<void()> task = ThreadPool::tasks.front();
@@ -37,7 +37,7 @@ ThreadPool::ThreadPool(unsigned int threadsAmount)
                 //run task
                 task();
             }
-        });
+            });
 
         //add thread to vector
         ThreadPool::threads.emplace_back(
@@ -61,9 +61,9 @@ ThreadPool::~ThreadPool()
     lock.unlock();
 
     //wait for all threads to finish
-    for (auto &t : ThreadPool::threads)
+    for (auto& t : ThreadPool::threads)
     {
-        if(t.joinable())
+        if (t.joinable())
             t.join();
     }
 }
@@ -90,9 +90,9 @@ void ThreadPool::WaitForAllAndStop()
     ThreadPool::condition.notify_all();
     lock.unlock();
 
-    for (auto &t : ThreadPool::threads)
+    for (auto& t : ThreadPool::threads)
     {
-        if(t.joinable())
+        if (t.joinable())
             t.join();
     }
 }

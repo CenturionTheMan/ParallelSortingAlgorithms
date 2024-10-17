@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Implementations">
+      <UniqueIdentifier>{acc0cece-4e8b-479c-99c4-83b2801e0531}</UniqueIdentifier>
+      <Extensions>cpp;cu</Extensions>
+    </Filter>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{4f5e55f4-8363-4b01-8ac3-d2d57d6bceda}</UniqueIdentifier>
+      <Extensions>h;cuh</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ThreadPool.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="ParallelFor.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="OddEvenSortCuda.cuh">
+      <Filter>Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ThreadPool.cpp">
+      <Filter>Implementations</Filter>
+    </ClCompile>
+    <ClCompile Include="ParallelFor.cpp">
+      <Filter>Implementations</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="OddEvenSortCuda.cu">
+      <Filter>Implementations</Filter>
+    </CudaCompile>
+  </ItemGroup>
+</Project>

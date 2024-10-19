@@ -1,5 +1,19 @@
 # ParallelSortingAlgorithms
 
+- [ParallelSortingAlgorithms](#parallelsortingalgorithms)
+  - [Benchmarking tool](#benchmarking-tool)
+    - [Functionalities](#functionalities)
+      - [Time measurement](#time-measurement)
+      - [Saving results](#saving-results)
+      - [Customizable configuration](#customizable-configuration)
+      - [Verification of solutions](#verification-of-solutions)
+    - [How to run benchmarking tool?](#how-to-run-benchmarking-tool)
+  - [Developer's manual](#developers-manual)
+    - [Sorting function convention](#sorting-function-convention)
+    - [Benchmarking tool flowchart](#benchmarking-tool-flowchart)
+    - [Directory structure](#directory-structure)
+  - [Resources](#resources)
+
 ## Benchmarking tool
 
 This project includes a source code for CLI benchmarking tool that allows you to measure time complexities of *Bitonic* and *Odd-Even* array sorting algorithms implemented for both CPU (plain *C++*) and GPU (*C++* & *CUDA*).
@@ -31,11 +45,11 @@ When measurement is done the average results for each instance size would be pri
 
 System saves measurement results for each repetition in an output file named `result.csv` located in tool's parent directory. Each line is associated with one repetition and contains following semicolon-separated (`;`) fields:
 
-1. Instance size (integer)
-2. Execution time for *Bitonic Sort* implemented on CPU (real)
-3. Execution time for *Bitonic Sort* implemented on GPU (real)
-3. Execution time for *Odd-Even Sort* implemented on CPU (real)
-3. Execution time for *Odd-Even Sort* implemented on GPU (real)
+1. Instance size (integer number)
+2. Execution time for *Bitonic Sort* implemented on CPU (real number with `,` decimal point or empty when measurement was disabled)
+3. Execution time for *Bitonic Sort* implemented on GPU (real number with `,` decimal point or empty when measurement was disabled)
+3. Execution time for *Odd-Even Sort* implemented on CPU (real number with `,` decimal point or empty when measurement was disabled)
+3. Execution time for *Odd-Even Sort* implemented on GPU (real number with `,` decimal point or empty when measurement was disabled)
 
 What's more the header would be also saved to the first line of `result.csv`.
 
@@ -58,12 +72,29 @@ Example of a valid configuration file is shown below:
 measure_cpu=0
 measure_gpu=1
 measure_bitonic=1
+measure_odd_even=1
 
 random_instance=50000 10
 random_instance=10000000 56
 random_instance=199 56
 
 predefined_instance=4 -1 88 2 9 4 105 1 34
+```
+
+Tool would print current configuration during startup. Example of such print for previously presented configuration file is shown below:
+
+```
+>>> CONFIGURATION LOADED
+
+CPU measurement                 OFF
+GPU measurement                 ON
+Bitonic Sort measurement        ON
+Odd-Even Sort measurement       ON
+
+Defined random instances        3
+Defined predefined instances    1
+Total defined instances         4
+
 ```
 
 #### Verification of solutions
@@ -91,21 +122,39 @@ Details about an error would be saved to the `error.log` file that would be loca
 
 Example of `error.log` content is shown below:
 
-```log
+```
 >>> The GPU Odd-Even has given an invalid solution for instance size 10  in repetition 4.
 [Instance]: 0 5 8 1 3 5 8
 [Solution]: 0 1 3 8 5 8 5
 ```
 
-### How to compile and use benchmarking tool
+### How to run benchmarking tool?
 
-In order to use benchmarking tool you need to compile the project. We recommend using a `gcc` compiler just as it's shown below.
-
-```bash
-gcc 
-```
+## Developer's manual
 
 ### Sorting function convention
+
+Each sorting algorithm implementation should be put inside a `<architecture><algorithm>Sort()` function, where `<implementation>` is a placeholder for achitecture (CPU/GPU) name and `<algorithm>` is a placeholder for algorithm (*Bitonic*/*Odd-Even*) name. Function's name should be written in camel case. Example of valid function's header is shown below.
+
+```cpp
+double GpuBitonicSort(int[] array, int array_length);
+```
+
+It should take a memory location and length of the `int` array that would be sorted. Sorted array would be placed in the same location as the original array. Return value of such function would be a `double` containing an execution time of the given sorting algorithm in seconds.
+
+### Benchmarking tool flowchart
+
+![benchmarking tool flowchart](./gfx/flowchart.svg)
+
+### Directory structure
+
+- `gfx`: All graphics used in the repo.
+- `benchmarking_tool`: source codes and headers of the benchmarking tools
+    - `headers`: headers for benchmarking tools source code
+    - `src`: source files for benchmarking tools source code
+- `tests`: folder for unit and integration tests
+- `scripts`: utility scripts for building and testing of the benchmarking tool as well as some scripts that would help to prepare graphs
+- `results`: saved `*.csv` files with benchmarking results
 
 ## Resources
 

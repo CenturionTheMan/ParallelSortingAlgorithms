@@ -1,7 +1,7 @@
-#include "OddEvenSortCuda.cuh"
+#include "odd_even_sort.cuh"
 
 
-__global__ void Cuda::Even(int* arr, int length) {
+__global__ void sorting::Even(int* arr, int length) {
 	int index = 2 * (blockIdx.x * blockDim.x + threadIdx.x); //get global index
 	if (index >= length - 1) return; //check if index is out of bounds
 
@@ -14,7 +14,7 @@ __global__ void Cuda::Even(int* arr, int length) {
     }
 }
 
-__global__ void Cuda::Odd(int* arr, int length) {
+__global__ void sorting::Odd(int* arr, int length) {
     int index = 2 * (blockIdx.x * blockDim.x + threadIdx.x) + 1; //get global index
     if (index >= length - 1) return; //check if index is out of bounds
 
@@ -26,7 +26,7 @@ __global__ void Cuda::Odd(int* arr, int length) {
     }
 }
 
-void Cuda::OddEvenSort(std::vector<int>& arr)
+void sorting::GpuOddEvenSort(std::vector<int>& arr)
 {
 	int half = arr.size() / 2; //get half size of the array
     int* d_arr; //arr copy for gpu
@@ -43,8 +43,8 @@ void Cuda::OddEvenSort(std::vector<int>& arr)
 	//half iterations because we handle even and odd indexes at the same time
     for (int i = 0; i < half; i++)
     {
-        Cuda::Even << <blocks, threads >> > (d_arr, arr.size()); //handle even
-        Cuda::Odd << <blocks, threads >> > (d_arr, arr.size()); //handle odd
+        sorting::Even << <blocks, threads >> > (d_arr, arr.size()); //handle even
+        sorting::Odd << <blocks, threads >> > (d_arr, arr.size()); //handle odd
 		cudaDeviceSynchronize(); //wait for all threads to finish
     }
 	cudaMemcpy(arr.data(), d_arr, arr.size() * sizeof(int), cudaMemcpyDeviceToHost); //copy back
@@ -53,7 +53,7 @@ void Cuda::OddEvenSort(std::vector<int>& arr)
 }
 
 
-void MultiThreaded::OddEvenSort(std::vector<int>& arr)
+void sorting::CpuOddEvenSort(std::vector<int>& arr)
 {
     bool sorted = false;
     while (!sorted)

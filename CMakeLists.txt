@@ -1,4 +1,16 @@
 cmake_minimum_required(VERSION 3.18)
+if (UNIX)
+    set(CMAKE_CUDA_COMPILER /usr/local/cuda/bin/nvcc)
+
+    if(CMAKE_CUDA_COMPILER)
+        enable_language(CUDA)
+
+        # to tell your code it was found via #ifdef USE_CUDA:
+        add_definitions(-DUSE_CUDA)    
+
+        include_directories("${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}")
+    endif()
+endif (UNIX)
 project(benchmarking_tool LANGUAGES C CXX CUDA)
 
 cmake_policy(SET CMP0104 NEW)

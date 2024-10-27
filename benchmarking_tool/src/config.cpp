@@ -2,6 +2,7 @@
 #include <sstream>
 #include <regex>
 #include <random>
+#include <climits>
 
 #include "config.h"
 #include "output.h"

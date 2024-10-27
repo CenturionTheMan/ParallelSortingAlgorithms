@@ -13,6 +13,9 @@ namespace sorting
 
 	void CpuOddEvenSort(std::vector<int>& arr);
 
+	void oldSort(std::vector<int>& arr);
+	void newSortJoin(std::vector<int>& arr);
+
 	__global__ void Odd(int* arr, int length);
 	__global__ void Even(int* arr, int length);
 }

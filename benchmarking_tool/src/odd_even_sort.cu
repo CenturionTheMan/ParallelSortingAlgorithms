@@ -1,6 +1,8 @@
 #include "odd_even_sort.cuh"
-#include <atomic>
+#include <chrono>
+#include <functional>
 #include <thread>
+#include <vector>
 
 __global__ void sorting::Even(int* arr, int length) {
 	int index = 2 * (blockIdx.x * blockDim.x + threadIdx.x); //get global index
@@ -56,9 +58,9 @@ void sorting::GpuOddEvenSort(std::vector<int>& arr)
 
 void sorting::CpuOddEvenSort(std::vector<int>& arr)
 {
-    // sorting::newSortJoin(arr);
+    sorting::newSortJoin(arr);
     
-    sorting::oldSort(arr);
+    // sorting::oldSort(arr);
 }
 
 void sorting::oldSort(std::vector<int>& arr) {
@@ -94,47 +96,89 @@ void sorting::oldSort(std::vector<int>& arr) {
     }
 }
 
-void compare(std::vector<int>& arr, std::atomic_bool &sorted, int startPoint, int endPoint) {
+void compare(std::vector<int>& arr, int startPoint, int endPoint) {
     for (int i = startPoint; i <= endPoint; i += 2) {
         if (arr[i] > arr[i + 1]) {
             std::swap(arr[i], arr[i + 1]);
-            sorted = false;
         }
     }
 }
 
+struct vecPoints {
+    int start;
+    int end;
+};
+
 void sorting::newSortJoin(std::vector<int>& arr) {
-    std::atomic_bool sorted = ATOMIC_VAR_INIT(false);
+    // Create threads
+    int splits = 10;
+    int sleepTime = 10;
+    int arrSize = arr.size();
+    sorting::ThreadPool p (splits);
+    std::vector<vecPoints> evenPoints;
+    std::vector<vecPoints> oddPoints;
+    bool sorted = false;
     bool odd = false;
-    int splits = 2;
-    int evenComparisons = arr.size() / 2;
-    int evenStep = 2 * evenComparisons / splits;
-    int oddComparisons = (arr.size() - 1) / 2;
-    int oddStep = 2 * oddComparisons / splits;
-    std::thread threads[splits];
+    int evenComparisons = arrSize / 2;
+    int oddComparisons = (arrSize - 1) / 2;
+{
 
-    while (!sorted) {
-        sorted = true;
-        int step = odd ? oddStep : evenStep;
-        int startPoint = int(odd);
-        int endPoint = step == 2 ? 1 + int(odd) : step - 2 * int(!odd);
+    int evenStep = std::max(2 * evenComparisons / splits, 2);
+    int oddStep = std::max(2 * oddComparisons / splits, 2);
 
-        for (int i = 0; i < splits; i++) {
-            threads[i] = std::thread(compare, std::ref(arr), std::ref(sorted), startPoint, endPoint);
+    for (int oddInt = 0; oddInt < 2; oddInt++) {
+        int step = oddInt ? oddStep : evenStep;
+        int startPoint = int(oddInt);
+        int endPoint = step == 2 ? 1 + int(oddInt) : step - 2 * int(!oddInt);
+
+        int jobs = std::min(splits, odd ? oddComparisons : evenComparisons);
+        odd ? oddPoints.reserve(jobs) : evenPoints.reserve(jobs);
+        for (int i = 0; i < jobs; i++) {
+            oddInt ? oddPoints.push_back({startPoint, endPoint}) : evenPoints.push_back({startPoint, endPoint});
 
             startPoint = ++endPoint;
-            endPoint += step == 2 ? 1 : (odd ? step - 1 : step - 2);
+            endPoint += step == 2 ? 1 : (oddInt ? step - 1 : step - 2);
             if (i + 2 == splits) {
-                while (arr.size() - endPoint > 2) {
+                while (arrSize - endPoint > 2) {
                     endPoint += 2;
                 }
             }
         }
+    }
+}
 
-        for (std::thread& t : threads) {
-            if (t.joinable()) t.join();
+    vecPoints range = {0, 0};
+    int loops = 0;
+    int jobs = std::min(splits, odd ? oddComparisons : evenComparisons);
+    while (!sorted) {
+        sorted = true;
+
+        // Assign them 'splits' jobs
+        jobs = std::min(splits, odd ? oddComparisons : evenComparisons);
+        for (int i = 0; i < jobs; i++) {
+            range = odd ? oddPoints[i] : evenPoints[i];
+            p.doJob(std::bind (compare, std::ref(arr), range.start, range.end));
         }
 
         odd = !odd;
+        loops = 0;
+        while (!p.queueRefill()) {
+            std::this_thread::sleep_for(std::chrono::microseconds(sleepTime));
+            loops++;
+        }
+
+        if (loops > 2) {
+            sleepTime++;
+        }
+        else if (loops == 0) {
+            sleepTime = std::max(sleepTime - 1, 1);
+        }
+
+        for (int i = 0; i < arrSize - 1; i++) {
+            if (arr[i] > arr[i+1]) {
+                sorted = false;
+                break;
+            }
+        }
     }
 }

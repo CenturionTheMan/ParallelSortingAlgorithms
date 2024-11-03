@@ -199,3 +199,4 @@ In order to debug the tool with *VS Code* you need to install both *CMake* and e
 ## Resources
 
 - [Project's board on Trello](https://trello.com/b/PZKg8jf4/gpuwt0910zrownoleglonealgorytmysortowania)
+- [Documentation on _Overleaf_](https://www.overleaf.com/project/67269f0e5f7564bafb402362)

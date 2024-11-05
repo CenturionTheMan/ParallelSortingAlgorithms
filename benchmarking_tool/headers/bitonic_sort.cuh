@@ -2,6 +2,7 @@
 #define BITONIC_SORT_H
 
 #include <vector>
+#include "cuda_runtime.h"
 
 namespace sorting
 {

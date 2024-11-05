@@ -8,7 +8,9 @@ __global__ void bitonicSortKernel(int *arr, int j, int k) {
     unsigned int ixj = i ^ j;
 
     if (ixj > i) {
-        if (((i & k) == 0 && arr[i] > arr[ixj]) || ((i & k) != 0 && arr[i] < arr[ixj])) {
+        const int ik = i & k;
+        const bool compare = arr[i] > arr[ixj];
+        if (((ik) == 0 && compare) || ((ik) != 0 && !compare)) {
             int temp = arr[i];
             arr[i] = arr[ixj];
             arr[ixj] = temp;
@@ -24,8 +26,10 @@ void sorting::GpuBitonicSort(std::vector<int>& arr) {
     cudaMalloc(&d_arr, size);
     cudaMemcpy(d_arr, arr.data(), size, cudaMemcpyHostToDevice);
 
-    dim3 blocks((arr.size() + 512 - 1) / 512);
-    dim3 threads(512);
+    const int threadAmount = 512;
+
+    dim3 blocks((arr.size() + threadAmount - 1) / threadAmount);
+    dim3 threads(threadAmount);
 
     int j, k;
     for (k = 2; k <= arr.size(); k <<= 1) {
@@ -33,8 +37,6 @@ void sorting::GpuBitonicSort(std::vector<int>& arr) {
             bitonicSortKernel<<<blocks, threads>>>(d_arr, j, k);
             cudaDeviceSynchronize();
         }
-    // dim3 blocks((arr.size() / 2 + 512 - 1) / 512);
-    // dim3 threads(512);
     }
 
     cudaMemcpy(arr.data(), d_arr, size, cudaMemcpyDeviceToHost);

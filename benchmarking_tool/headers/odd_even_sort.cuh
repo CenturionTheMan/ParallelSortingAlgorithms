@@ -79,6 +79,10 @@ namespace sorting
 			return jobs_.size();
 		}
 
+		int getThreadsAmount() {
+			return threads_.size();
+		}
+
 		int tDone() {
 			return threadsWorking;
 		}

@@ -9,6 +9,8 @@ namespace sorting
 	void GpuBitonicSort(std::vector<int>& arr);
 
 	void CpuBitonicSort(std::vector<int>& arr);
+
+	void bitonicSort(std::vector<int>& arr);
 }
 
 #endif

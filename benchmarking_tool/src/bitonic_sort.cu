@@ -92,8 +92,8 @@ void bitonicSortrecA(std::vector<int>& a, int start, int BseqSize, int direction
             bT.join();
         }
         else {
-            bitonicSortrecA(a, start, k, 1, level - 1);
-            bitonicSortrecA(a, start+k, k, 0, level - 1);
+            bitonicSortrec(a, start, k, 1);
+            bitonicSortrec(a, start+k, k, 0);
         }
         bitonicSeqMerge(a, start, BseqSize, direction);
     }
@@ -104,18 +104,11 @@ void sorting::bitonicSort(std::vector<int>& arr) {
     bool mt = true;
 
     if (mt) {
-        int level = 3;
+        int level = std::min(std::log2(std::thread::hardware_concurrency()) + 1, std::log2(arr.size() - 1));
 
-        int k = arr.size() / 2;
         int start = 0;
 
-        std::thread a (std::bind(bitonicSortrecA, std::ref(arr), start, k, 1, level));
-        std::thread b (std::bind(bitonicSortrecA, std::ref(arr), start+k, k, 0, level));
-
-        a.join();
-        b.join();
-
-        bitonicSeqMerge(arr, start, arr.size(), 1);
+        bitonicSortrecA(arr, start, arr.size(), 1, level);
     }
     else {
         bitonicSortrec(arr, 0, arr.size(), 1);

@@ -1,5 +1,6 @@
 import math
 from collections.abc import Callable
+from decimal import Decimal
 from typing import Literal, TypeAlias
 
 
@@ -22,11 +23,11 @@ COLORS: dict[Implementation, str] = {
 }
 
 
-TREND_LINES: dict[Implementation, Callable[[float], float]] = {
-    "bitonic sort (CPU)": lambda size: math.log2(size) ** 2, 
-    "bitonic sort (GPU)": lambda size: math.log2(size) ** 2, 
-    "odd-even sort (CPU)": lambda size: float(size), 
-    "odd-event sort (GPU)": lambda size: float(size)
+TREND_LINES: dict[Implementation, Callable[[int], Decimal]] = {
+    "bitonic sort (CPU)": lambda size: Decimal(math.log2(size)) ** Decimal(2), 
+    "bitonic sort (GPU)": lambda size: Decimal(math.log2(size)) ** Decimal(2), 
+    "odd-even sort (CPU)": lambda size: Decimal(size),
+    "odd-event sort (GPU)": lambda size: Decimal(size)
 }
 
 

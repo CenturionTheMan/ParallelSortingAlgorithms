@@ -1,4 +1,5 @@
 import sys
+from decimal import Decimal
 from textwrap import wrap
 
 import matplotlib.pyplot as plt
@@ -20,7 +21,7 @@ graph[1].xaxis.set_major_formatter(ScalarFormatter(useMathText=True))
 graph[1].ticklabel_format(style="sci", axis="x", scilimits=(0,0))
 
 for implementation, results in results.items():
-    trend_line: dict[int, float] = trendline.get_trendline(const.TREND_LINES[implementation], results)
+    trend_line: dict[int, Decimal] = trendline.get_trendline(const.TREND_LINES[implementation], results)
     graph[1].plot(
         results.keys(),
         results.values(),

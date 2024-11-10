@@ -60,9 +60,9 @@ void sorting::GpuOddEvenSort(std::vector<int>& arr)
 
 void sorting::CpuOddEvenSort(std::vector<int>& arr)
 {
-    sorting::newSortJoin(arr);
+    //sorting::newSortJoin(arr);
     
-    // sorting::oldSort(arr);
+    sorting::oldSort(arr);
 }
 
 void sorting::oldSort(std::vector<int>& arr) {

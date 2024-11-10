@@ -44,19 +44,19 @@ graph[1].ticklabel_format(style="sci", axis="y", scilimits=(0,0))
 graph[1].xaxis.set_major_formatter(ScalarFormatter(useMathText=True))
 graph[1].ticklabel_format(style="sci", axis="x", scilimits=(0,0))
 
-for result, color in zip([result_1, result_2], ["r", "b"]):
+for result, color, measurement_name in zip([result_1, result_2], ["r", "b"], [sys.argv[1], sys.argv[2]]):
     for implementation, results_1 in result.items():
         trend_line: dict[float, float] = trendline.get_trendline(const.TREND_LINES[implementation], results_1)
         graph[1].plot(
             results_1.keys(),
             results_1.values(),
             f"{const.MARKERS[implementation]}{color}",
-            label=f"Pomiar {implementation}"
+            label=f"Pomiar {implementation} z {measurement_name}"
         )
         graph[1].plot(
             trend_line.keys(), 
             trend_line.values(), f"--{color}", 
-            label=f"Krzywa wzorcowa {const.TREND_LINES_NAMES[implementation]}: {implementation}"
+            label=f"Krzywa wzorcowa {const.TREND_LINES_NAMES[implementation]}: {implementation} z {measurement_name}"
         )
 
 graph[1].legend()

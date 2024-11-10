@@ -1,11 +1,12 @@
 import csv
+from decimal import Decimal
 
 import _common.constants as const
 
 
 def load_results_csv(
     csv_file: str
-) -> dict[const.Implementation, dict[int, float]]:
+) -> dict[const.Implementation, dict[int, Decimal]]:
     """
     Loads all measurement results from file with given path.
 
@@ -13,7 +14,7 @@ def load_results_csv(
     - `csv_file` (`str`): Path to a CSV file with measurement results.
 
     Return
-    - `dict[dict[int, float]]`: Dictionary of dictionaries where each nested dictionary corresponds to one of measured 
+    - `dict[dict[int, Decimal]]`: Dictionary of dictionaries where each nested dictionary corresponds to one of measured 
     implementations. Nested dictionaries include key-value pairs wieher key is an instance size and value is a floating
     point measurement result for it. Example:
 
@@ -26,7 +27,7 @@ def load_results_csv(
         }
         ```
     """
-    result: dict[const.Implementation, dict[int, float]] = {
+    result: dict[const.Implementation, dict[int, Decimal]] = {
         "bitonic sort (CPU)": {},
         "bitonic sort (GPU)": {},
         "odd-even sort (CPU)": {},
@@ -43,16 +44,18 @@ def load_results_csv(
         for record in reader:
             for implementation in result.keys():
                 if record["instance size"] not in result[implementation]:
-                    result[implementation][int(record["instance size"])] = 0.0
+                    result[implementation][int(record["instance size"])] = Decimal(0.0)
                     repetitions[implementation][record["instance size"]] = 0
-                result[implementation][int(record["instance size"])] += float(record[implementation])
+                result[implementation][int(record["instance size"])] += (
+                    Decimal(record[implementation]) if record[implementation] != "" else Decimal(0.0)
+                )
                 repetitions[implementation][record["instance size"]] += 1
 
     not_measured_implementations: set = set()
     for implementation_, results in result.items():
         for instance_size, time_measurement in results.items():
             time_measurement /= repetitions[implementation_][str(instance_size)]
-            if time_measurement == 0.0:
+            if time_measurement == Decimal(0.0):
                 not_measured_implementations.add(implementation_)
 
     return {

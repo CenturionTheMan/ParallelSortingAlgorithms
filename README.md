@@ -16,6 +16,9 @@
       - [Windows](#windows)
       - [VS Code](#vs-code)
     - [Debugging (in VS Code)](#debugging-in-vs-code)
+  - [Graph-generating scripts](#graph-generating-scripts)
+    - [Usage](#usage)
+    - [Prerequisites](#prerequisites)
   - [Resources](#resources)
 
 ## Benchmarking tool
@@ -195,6 +198,56 @@ In order to run tests in the *VS Code* you need to install both *CMake* and exte
 In order to debug the tool with *VS Code* you need to install both *CMake* and extensions such as *CMake Extension*, *CMake Tools Extension* and *CMake Language Support Extension*. This would add another tab to your IDE called *CMake*, where you can run the debugger with appropriate context menu (see figure below).
 
 ![how to run debugger](./gfx/cmake-debug.png)
+
+## Graph-generating scripts
+
+### Usage
+
+The tool comes with a handful of *Python 3.12* scripts that allow to generate various graph for:
+
+- Comparison of all implementations (based on one `result.csv` file).
+
+  ```bash
+  python3 scripts/graph_generators/compare_all_implementations.py PATH_TO_RESULTS_FILE
+  ```
+
+- Comparison of two benchmarks for one of implementations (based on two `result.csv` files).
+
+  ```bash
+  python3 scripts/graph_generators/compare_one_implementation.py PATH_TO_RESULTS_FILE
+  ```
+
+- Comparison of CPU and GPU implementations for one algorithm (based on one `results.csv` file).
+
+  ```bash
+  python3 scripts/graph_generators/compare_cpu_gpu_for_algorithm.py PATH_TO_RESULTS_FILE
+  ```
+
+- Presentation of time complexity for one of implementations (based on one `results.csv` file).
+
+  ```bash
+  python3 scripts/graph_generators/implementation_time_complexity.py PATH_TO_RESULTS_FILE
+  ```
+
+All of those scripts present an appropriate graph and saves it to a PDF file to the `gfx/plots/` directory.
+
+### Prerequisites
+
+In order to use graph-generating scripts you need to create a *Python 3.12* virtual environment.
+
+```bash
+python3 -m vevnv .venv
+```
+
+Then you need to activate this environment and install all required dependencies from the `requirements.txt`.
+
+```bash
+source .venv/bin/acivate
+```
+
+```bash
+pip install -r requirements.txt
+```
 
 ## Resources
 

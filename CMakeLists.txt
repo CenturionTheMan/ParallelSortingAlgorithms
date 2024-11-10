@@ -11,6 +11,14 @@ if (UNIX)
         include_directories("${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}")
     endif()
 endif (UNIX)
+
+if (WIN32)
+
+find_package(CUDAToolkit)
+enable_language(CUDA)
+
+endif (WIN32)
+
 project(benchmarking_tool LANGUAGES C CXX CUDA)
 
 cmake_policy(SET CMP0104 NEW)

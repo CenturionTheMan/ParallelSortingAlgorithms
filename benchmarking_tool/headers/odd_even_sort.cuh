@@ -10,7 +10,6 @@
 #include <thread>
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
-#include <iostream>
 
 namespace sorting
 {
@@ -20,7 +19,7 @@ namespace sorting
 
 	void oldSort(std::vector<int>& arr);
 	void newSortJoin(std::vector<int>& arr);
-	void overSortJoin(std::vector<int>& arr);
+	void sortMT(std::vector<int>& arr);
 
 	// https://stackoverflow.com/questions/26516683/reusing-thread-in-loop-c
 	class ThreadPool
@@ -33,14 +32,10 @@ namespace sorting
 			threads_.reserve (threads);
 			for (int i = 0; i < threads; ++i)
 				threads_.emplace_back(std::bind(&ThreadPool::threadEntry, this, i));
-
-			// std::cout << "Threads size: " << (sizeof(std::vector<std::thread>) + threads_.size() * sizeof(std::thread))<< "B\n";
 		}
 
 		~ThreadPool ()
 		{
-			// std::cout << "Jobs size: " << prevSizeB << "kB\n";
-
 			{
 				// Unblock any threads and tell them to stop
 				std::unique_lock<std::mutex> l(lock_);
@@ -60,10 +55,6 @@ namespace sorting
 			std::unique_lock<std::mutex> l(lock_);
 
 			jobs_.emplace(std::move(func));
-			// int size = (sizeof(std::vector<std::function<void()>>) + jobs_.size() * sizeof(std::function<void()>)) / 1024;
-			// if (size > prevSizeB) {
-			// 	prevSizeB = size;
-			// }
 			condVar_.notify_one();
 		}
 		
@@ -77,20 +68,6 @@ namespace sorting
 
 		int jobsSize() {
 			return jobs_.size();
-		}
-
-		int tDone() {
-			return threadsWorking;
-		}
-		bool threadsDone() {
-			std::unique_lock <std::mutex> l(lock_);
-
-			return threadsWorking == threads_.size();
-		}
-		void resetDoneThreads() {
-			std::unique_lock <std::mutex> l(lock_);
-
-			threadsWorking = 0;
 		}
 
 		protected:
@@ -118,22 +95,7 @@ namespace sorting
 				}
 
 				// Do the job without holding any locks
-    			// std::chrono::time_point<std::chrono::high_resolution_clock> now = std::chrono::high_resolution_clock::now();
-
-				{
-					std::unique_lock <std::mutex> l(lock_);
-					threadsWorking++;
-				}
 				job();
-				{
-					std::unique_lock <std::mutex> l(lock_);
-					threadsWorking--;
-				}
-				// {
-				// 	std::unique_lock <std::mutex> l(lock_);
-				// 	threadsDoneCount++;
-				// // 	std::cout << "Thread job: " << (std::chrono::high_resolution_clock::now() - now).count() << "\n";
-				// }
 			}
 
 		}
@@ -143,8 +105,6 @@ namespace sorting
 		bool shutdown_;
 		std::queue<std::function<void(void)>> jobs_;
 		std::vector<std::thread> threads_;
-		int threadsWorking = 0;
-		int prevSizeB = 0;
 	};
 
 	__global__ void Odd(int* arr, int length);

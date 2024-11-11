@@ -108,9 +108,6 @@ namespace sorting
 		std::queue<std::function<void(void)>> jobs_;
 		std::vector<std::thread> threads_;
 	};
-
-	__global__ void Odd(int* arr, int length);
-	__global__ void Even(int* arr, int length);
 }
 
 #endif

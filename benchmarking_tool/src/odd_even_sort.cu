@@ -61,7 +61,6 @@ void sorting::CpuOddEvenSort(std::vector<int>& arr)
 {
     // sorting::newSortJoin(arr);
     sorting::sortMT(arr);
-    
     // sorting::oldSort(arr);
 }
 
@@ -229,6 +228,7 @@ inline void compareMT(std::vector<int>& arr, const int startPoint, const int end
 
             sorted = false;
             swapped = true;
+
         }
 
         if (!swapped) break;

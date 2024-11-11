@@ -10,6 +10,7 @@
 #include <thread>
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
+#include <iostream>
 
 namespace sorting
 {
@@ -19,6 +20,7 @@ namespace sorting
 
 	void oldSort(std::vector<int>& arr);
 	void newSortJoin(std::vector<int>& arr);
+
 	void sortMT(std::vector<int>& arr);
 
 	// https://stackoverflow.com/questions/26516683/reusing-thread-in-loop-c

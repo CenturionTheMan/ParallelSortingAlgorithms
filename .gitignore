@@ -3,6 +3,12 @@
 *.vcxproj
 CMakeFiles/*
 .vscode/*
+.venv/*
+gfx/plots/*
+benchmarking_tool_release
+benchmarking_tool_debug
+build_debug/*
+build_release/*
 
 # Created by https://www.toptal.com/developers/gitignore/api/windows,linux,macos,c++,python,cuda,visualstudiocode,visualstudio,clion,executable
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,linux,macos,c++,python,cuda,visualstudiocode,visualstudio,clion,executable

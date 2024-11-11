@@ -180,41 +180,65 @@ void sorting::newSortJoin(std::vector<int>& arr) {
     }
 }
 
-void compareMT(std::vector<int>& arr, const int startPoint, const int endPoint, std::mutex& m, bool& sorted) {
-    int oddEnd = std::min(endPoint + 1, int(arr.size()));
+inline void compareMT(std::vector<int>& arr, const int startPoint, const int endPoint, std::mutex& m, bool& sorted) {
+    const int oddEnd = std::min(endPoint + 1, int(arr.size()));
 
-    while(true) {
+    while (true) {
+        bool needsLock = false;
         bool swapped = false;
-        for (int i = startPoint; i < endPoint; i += 2) {
-            if (arr[i] > arr[i + 1]) {
-                std::swap(arr[i], arr[i + 1]);
-                if (!swapped) {
-                    std::unique_lock<std::mutex> lock(m);
 
-                    sorted = false;
-                    swapped = true;
-                }
-            }
-        }
         for (int i = startPoint + 1; i < oddEnd; i += 2) {
+            // Odd
             if (arr[i] > arr[i + 1]) {
                 std::swap(arr[i], arr[i + 1]);
-                if (!swapped) {
-                    std::unique_lock<std::mutex> lock(m);
 
-                    sorted = false;
-                    swapped = true;
+                if (!swapped) {
+                    std::unique_lock<std::mutex> lock(m, std::defer_lock);
+                    
+                    if (lock.try_lock()) {
+                        sorted = false;
+                        swapped = true;
+                        needsLock = false;
+                    }
+                    else {
+                        needsLock = true;
+                    }
+                }
+            }
+            // Even
+            if (arr[i - 1] > arr[i]) {
+                std::swap(arr[i - 1], arr[i]);
+ 
+                if (!swapped) {
+                    std::unique_lock<std::mutex> lock(m, std::defer_lock);
+                    
+                    if (lock.try_lock()) {
+                        sorted = false;
+                        swapped = true;
+                        needsLock = false;
+                    }
+                    else {
+                        needsLock = true;
+                    }
                 }
             }
         }
+
+        if (needsLock) {
+            std::unique_lock<std::mutex> lock(m);
+
+            sorted = false;
+            swapped = true;
+        }
+
         if (!swapped) break;
     }
 }
 
 void sorting::sortMT(std::vector<int>& arr) {
-    int threadsCount = std::min(int(std::thread::hardware_concurrency()), std::max(1, int(std::log2(arr.size())) - 5));
+    const int threadsCount = std::min(int(std::thread::hardware_concurrency()), std::max(1, int(std::log2(arr.size())) - 5));
     bool sorted = false;
-    int k = arr.size() / threadsCount;
+    const int k = arr.size() / threadsCount;
     int start = 0;
     std::mutex m;
     std::thread group[threadsCount];

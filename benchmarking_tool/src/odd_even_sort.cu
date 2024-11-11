@@ -5,7 +5,7 @@
 #include <thread>
 #include <vector>
 
-__global__ void OddEven(int* arr, int length, int phase) {
+__global__ void OddEven(int* arr, int length, int phase, bool* wasSwap) {
     int index = 2 * (blockIdx.x * blockDim.x + threadIdx.x) + phase;
     if (index >= length - 1) return;
 
@@ -15,29 +15,40 @@ __global__ void OddEven(int* arr, int length, int phase) {
     if (current > next) {
         arr[index] = next;
         arr[index + 1] = current;
+        *wasSwap = true;
     }
 }
 
 
 void sorting::GpuOddEvenSort(std::vector<int>& arr)
 {
-	int half = arr.size() / 2;
-    int* d_arr;
-    cudaMalloc(&d_arr, arr.size() * sizeof(int));
-    cudaMemcpy(d_arr, arr.data(), arr.size() * sizeof(int), cudaMemcpyHostToDevice);
+    int half = arr.size() / 2;
 
-    int threads = 256;
+    int* gpuArr;
+    cudaMalloc(&gpuArr, arr.size() * sizeof(int));
+    cudaMemcpy(gpuArr, arr.data(), arr.size() * sizeof(int), cudaMemcpyHostToDevice);
+
+	bool* cudaWasSwap, wasSwap;
+	cudaMalloc(&cudaWasSwap, sizeof(bool));
+
+    int threads = 1028;
 
     int blocks = (int)ceil(half / (double)threads);
 
     for (int i = 0; i < arr.size(); i++)
     {
-        OddEven << <blocks, threads >> > (d_arr, arr.size(), i % 2);
-        cudaDeviceSynchronize();
-    }
-    cudaMemcpy(arr.data(), d_arr, arr.size() * sizeof(int), cudaMemcpyDeviceToHost);
+		wasSwap = false;
+		cudaMemcpy(cudaWasSwap, &wasSwap, sizeof(bool), cudaMemcpyHostToDevice);
 
-    cudaFree(d_arr);
+        OddEven << <blocks, threads >> > (gpuArr, arr.size(), i % 2, cudaWasSwap);
+        cudaDeviceSynchronize();
+
+		cudaMemcpy(&wasSwap, cudaWasSwap, sizeof(bool), cudaMemcpyDeviceToHost);
+		if (!wasSwap) break;
+    }
+    cudaMemcpy(arr.data(), gpuArr, arr.size() * sizeof(int), cudaMemcpyDeviceToHost);
+
+    cudaFree(gpuArr);
 }
 
 
@@ -220,12 +231,12 @@ inline void compareMT(std::vector<int>& arr, const int startPoint, const int end
 }
 
 void sorting::sortMT(std::vector<int>& arr) {
-    const int threadsCount = std::min(int(std::thread::hardware_concurrency()), std::max(1, int(std::log2(arr.size())) - 5));
+    const int threadsCount = 10;
     bool sorted = false;
     const int k = arr.size() / threadsCount;
     int start = 0;
     std::mutex m;
-    std::vector<std::thread> group = std::vector<std::thread>(threadsCount);
+    std::thread group[threadsCount];
     while (!sorted) {
         sorted = true;
         start = 0;

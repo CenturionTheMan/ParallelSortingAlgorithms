@@ -236,15 +236,22 @@ All of those scripts present an appropriate graph and saves it to a PDF file to 
 In order to use graph-generating scripts you need to create a *Python 3.12* virtual environment.
 
 ```bash
-python3 -m vevnv .venv
+python3 -m venv .venv
 ```
 
 Then you need to activate this environment and install all required dependencies from the `requirements.txt`.
 
+On Linux:
 ```bash
 source .venv/bin/acivate
 ```
 
+On Windows:
+```bash
+.\.venv\Scripts\activate
+```
+
+Then:
 ```bash
 pip install -r requirements.txt
 ```

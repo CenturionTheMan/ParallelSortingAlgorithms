@@ -5,52 +5,56 @@
 #include <thread>
 #include <vector>
 
-__global__ void OddEven(int* arr, int length, int phase, bool* wasSwap) {
-    int index = 2 * (blockIdx.x * blockDim.x + threadIdx.x) + phase;
-    if (index >= length - 1) return;
+__global__ void OddEven(int* arr, int length) {
+	int globalId = blockIdx.x * blockDim.x + threadIdx.x;
+    int globalIndex = 2 * globalId;
 
+	if (globalIndex < length) //even
+	{
+		int curr = arr[globalIndex];
+		int next = arr[globalIndex + 1];
+		if (curr > next)
+		{
+			arr[globalIndex] = next;
+			arr[globalIndex + 1] = curr;
 
-    int current = arr[index];
-    int next = arr[index + 1];
-    if (current > next) {
-        arr[index] = next;
-        arr[index + 1] = current;
-        *wasSwap = true;
-    }
+		}
+	}
+	__syncthreads();
+
+	if (globalIndex + 1 < length) //odd
+	{
+		int cur = arr[globalIndex + 1];
+		int next = arr[globalIndex + 2];
+		if (cur > next)
+		{
+			arr[globalIndex + 1] = next;
+			arr[globalIndex + 2] = cur;
+		}
+	}
+	__syncthreads();
 }
 
 
 void sorting::GpuOddEvenSort(std::vector<int>& arr)
 {
-    int half = arr.size() / 2;
-
     int* gpuArr;
     cudaMalloc(&gpuArr, arr.size() * sizeof(int));
     cudaMemcpy(gpuArr, arr.data(), arr.size() * sizeof(int), cudaMemcpyHostToDevice);
 
-	bool* cudaWasSwap, wasSwap;
-	cudaMalloc(&cudaWasSwap, sizeof(bool));
+    int threads = 512;
 
-    int threads = 1028;
+    int blocks = (int)ceil(arr.size() / (double)threads);
 
-    int blocks = (int)ceil(half / (double)threads);
-
-    for (int i = 0; i < arr.size(); i++)
+    for (int i = 0; i < arr.size() / 2; i++)
     {
-		wasSwap = false;
-		cudaMemcpy(cudaWasSwap, &wasSwap, sizeof(bool), cudaMemcpyHostToDevice);
-
-        OddEven << <blocks, threads >> > (gpuArr, arr.size(), i % 2, cudaWasSwap);
+        OddEven << <blocks, threads >> > (gpuArr, arr.size());
         cudaDeviceSynchronize();
-
-		cudaMemcpy(&wasSwap, cudaWasSwap, sizeof(bool), cudaMemcpyDeviceToHost);
-		if (!wasSwap) break;
     }
     cudaMemcpy(arr.data(), gpuArr, arr.size() * sizeof(int), cudaMemcpyDeviceToHost);
 
     cudaFree(gpuArr);
 }
-
 
 void sorting::CpuOddEvenSort(std::vector<int>& arr)
 {

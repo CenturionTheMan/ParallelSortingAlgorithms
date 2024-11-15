@@ -13,7 +13,7 @@ TEST(measure_implementation_for_instance, whenSolutionValidThenReturnValidSoluti
     };
 
     data::solution_validation_data_t verification_data = measurement::measure_implementation_for_instance(
-        instance, implementation, &measurement_result
+        instance, implementation, &measurement_result, true
     );
 
     EXPECT_EQ(verification_data.validation_code, data::SOLUTION_VALID);
@@ -26,7 +26,7 @@ TEST(measure_implementation_for_instance, whenSolutionInvalidThenReturnValidSolu
     auto implementation = [](std::vector<int>& array) {};
 
     data::solution_validation_data_t verification_data = measurement::measure_implementation_for_instance(
-        instance, implementation, &measurement_result
+        instance, implementation, &measurement_result, true
     );
 
     EXPECT_EQ(verification_data.validation_code, data::SOLUTION_INVALID);
@@ -41,7 +41,7 @@ TEST(measure_implementation_for_instance, whenFunctionCalledThenSaveTimeMeasurem
     };
 
     measurement::measure_implementation_for_instance(
-        instance, implementation, &measurement_result
+        instance, implementation, &measurement_result, true
     );
 
     EXPECT_TRUE(measurement_result > 0.0);
@@ -56,7 +56,7 @@ TEST(measure_implementation_for_instance, whenFunctionFinishedThenOriginalInstan
     };
 
     measurement::measure_implementation_for_instance(
-        instance, implementation, &measurement_result
+        instance, implementation, &measurement_result, true
     );
 
     EXPECT_EQ(instance.sequence, std::vector<int>({8, 9, 3, 2, 10, 5, 6, 7, 4, 1}));

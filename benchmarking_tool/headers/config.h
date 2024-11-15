@@ -15,6 +15,7 @@ namespace config {
      *  @param measure_cpu Tells if the CPU implementations must mu measured.
      *  @param measure_bitonic Tells if Bitonic Sort implementations must be measured.
      *  @param measure_odd_even Tells if Odd-Even Sort implementations must be measured.
+     *  @param verify_results Tells if solution would be verified.
      */
     struct configuration_t
     {
@@ -23,17 +24,20 @@ namespace config {
         bool measure_cpu;
         bool measure_bitonic;
         bool measure_odd_even;
+        bool verify_results;
 
         configuration_t(
             bool measure_gpu = true,
             bool measure_cpu = true,
             bool measure_odd_even = true,
-            bool measure_bitonic = true
+            bool measure_bitonic = true,
+            bool verify_results = true
         ):
             measure_gpu(measure_gpu),
             measure_cpu(measure_cpu),
             measure_odd_even(measure_odd_even),
-            measure_bitonic(measure_bitonic){}
+            measure_bitonic(measure_bitonic),
+            verify_results(verify_results){}
     };
 
 

@@ -19,7 +19,8 @@ measurement::Timer::~Timer()
 data::solution_validation_data_t measurement::measure_implementation_for_instance(
     const data::instance_t& instance, 
     std::function<void(std::vector<int>&)> implementation, 
-    double *result_location
+    double *result_location,
+    bool validate
 ) {
     data::instance_t solved_instance = instance;
 
@@ -29,7 +30,7 @@ data::solution_validation_data_t measurement::measure_implementation_for_instanc
     }
 
     return data::solution_validation_data_t(
-        verification::solution_is_valid(solved_instance) ? data::SOLUTION_VALID : data::SOLUTION_INVALID,
+        verification::solution_is_valid(solved_instance, validate) ? data::SOLUTION_VALID : data::SOLUTION_INVALID,
         instance,
         solved_instance
     );
@@ -48,13 +49,13 @@ data::solution_validation_data_t measurement::measure_algorithm_for_instance(
 
     if (current_configuration.measure_cpu)
         cpu_verification_data = measure_implementation_for_instance(
-            instance, cpu_implementation, cpu_result_location
+            instance, cpu_implementation, cpu_result_location, current_configuration.verify_results
         );
     else
         *cpu_result_location = data::MEASUREMENT_NOT_PERFORMED;
     if (current_configuration.measure_gpu)
         gpu_verification_data = measure_implementation_for_instance(
-            instance, gpu_implementation, gpu_result_location
+            instance, gpu_implementation, gpu_result_location, current_configuration.verify_results
         );
     else
         *gpu_result_location = data::MEASUREMENT_NOT_PERFORMED;

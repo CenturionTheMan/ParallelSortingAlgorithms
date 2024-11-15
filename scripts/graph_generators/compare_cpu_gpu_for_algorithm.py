@@ -1,10 +1,13 @@
 import sys
 from collections.abc import Callable
+from decimal import Decimal
 from textwrap import wrap
+from typing import Literal
 
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
 from matplotlib.figure import Figure
+from matplotlib.scale import LogScale
 
 import _common.constants as const
 import _common.loader as loader
@@ -28,7 +31,7 @@ if user_choice not in MENU_OPTIONS:
     input("Press ENTER to continue...")
     exit(1)
 
-results: dict[const.Implementation, dict[int, float]] = {
+results: dict[const.Implementation, dict[int, dict[Literal["mean", "std_dev"], Decimal]]] = {
     implementation: results for implementation, results in loader.load_results_csv(sys.argv[1]).items()
     if implementation in MENU_OPTIONS[user_choice]
 }
@@ -41,11 +44,13 @@ graph[1].ticklabel_format(style="sci", axis="x", scilimits=(0,0))
 
 for implementation, results in results.items():
     trend_line: dict[float, float] = trendline.get_trendline(const.TREND_LINES[implementation], results)
-    graph[1].plot(
+    graph[1].errorbar(
         results.keys(),
-        results.values(),
-        f"{const.MARKERS[implementation]}{const.COLORS[implementation]}",
-        label=f"Pomiar {implementation}"
+        [result["mean"] for result in results.values()],
+        yerr=[result["std_dev"] for result in results.values()],
+        fmt=f"{const.MARKERS[implementation]}{const.COLORS[implementation]}",
+        label=f"Pomiar {implementation}",
+        capsize=5
     )
     graph[1].plot(
         trend_line.keys(), 
@@ -63,6 +68,7 @@ plt.xticks(rotation=90)
 plt.xlabel(r"Rozmiar instancji [$n$]")
 plt.ylabel("Czas sortowania [s]")
 plt.xticks()
+plt.xscale(LogScale(graph[0], base=2))
 plt.grid(visible=True)
 print(f"Time compelxity comparison for implementations of {get_algorithm_name()} algorithm has been generated!")
 plt.show()

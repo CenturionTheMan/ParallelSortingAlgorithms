@@ -5,7 +5,7 @@
 #include "output.h"
 
 
-const char* TABLE_SEPARATOR = "#===============#=============#=============#==============#==============#\n";
+const char* TABLE_SEPARATOR = "#===============#=========================#=========================#==========================#==========================#\n";
 
 
 output::ResultsOutputStream &output::ResultsOutputStream::getStream()
@@ -29,22 +29,22 @@ void output::ResultsOutputStream::dumpResult(const data::results_t &results)
 
 void output::ResultsOutputStream::printAverageResult(const data::results_t &average_results)
 {
-    auto resultToString = [](double result) {
-        char string_result[12];
+    auto resultToString = [](double result, double std_derivation) {
+        char string_result[24];
         if (result != data::MEASUREMENT_NOT_PERFORMED)
-            sprintf(string_result, "%.2e s", result);
+            sprintf(string_result, "%.2e (%.2e) s", result, std_derivation);
         else
             sprintf(string_result, "");
         return std::string(string_result);
     };
 
     printf(
-        "| %13d | %11s | %11s | %12s | %12s |\n",
+        "| %13d | %23s | %23s | %24s | %24s |\n",
         average_results.instance_size,
-        resultToString(average_results.cpu_bitonic_time_seconds).c_str(),
-        resultToString(average_results.gpu_bitonic_time_seconds).c_str(),
-        resultToString(average_results.cpu_odd_even_time_seconds).c_str(),
-        resultToString(average_results.gpu_odd_even_time_seconds).c_str()
+        resultToString(average_results.cpu_bitonic_time_seconds, average_results.cpu_bitonic_std_deviation).c_str(),
+        resultToString(average_results.gpu_bitonic_time_seconds, average_results.gpu_bitonic_std_deviation).c_str(),
+        resultToString(average_results.cpu_odd_even_time_seconds, average_results.cpu_odd_even_std_deviation).c_str(),
+        resultToString(average_results.gpu_odd_even_time_seconds, average_results.gpu_odd_even_std_deviation).c_str()
     );
 }
 
@@ -57,13 +57,13 @@ void output::ResultsOutputStream::open()
     output::printNotification("STARTING BENCHMARK...");
     printf("\n");
     printf("%s", TABLE_SEPARATOR);
-    printf("%s", "| Instance size | CPU Bitonic | GPU Bitonic | CPU Odd-Even | GPU Odd-Even |\n");
+    printf("%s", "| Instance size |       CPU Bitonic       |       GPU Bitonic       |       CPU Odd-Even       |       GPU Odd-Even       |\n");
     printf("%s", TABLE_SEPARATOR);
 
     results_file.open("results.csv", std::ios::out);
     if (!results_file.good())
         throw std::runtime_error("Something went wrong while creating \"results.csv\" file!");
-    results_file << "instance size;bitonic sort (CPU);bitonic sort (GPU);odd-even sort (CPU);odd-event sort (GPU)\n";
+    results_file << "instance size;mean bitonic sort (CPU);mean bitonic sort (GPU);mean odd-even sort (CPU);mean odd-event sort (GPU)\n";
 }
 
 void output::ResultsOutputStream::close()
@@ -133,6 +133,7 @@ void output::printConfigurationOutput(const config::configuration_t &current_con
     const char* GPU_SETUP_LABEL = "GPU measurement";
     const char* BITONIC_SETUP_LABEL = "Bitonic Sort measurement";
     const char* INSTANCES_SETUP_LABEL = "Defined instances";
+    const char* VERIFY_LABEL = "Verify";
 
     auto printConfigRow = [](const char* label = "", const char* value = "") {
         printf("%-32s%s\n", label, value);
@@ -148,6 +149,7 @@ void output::printConfigurationOutput(const config::configuration_t &current_con
     printConfigRow(GPU_SETUP_LABEL, setupValueToString(current_configuration.measure_gpu));
     printConfigRow(BITONIC_SETUP_LABEL, setupValueToString(current_configuration.measure_bitonic));
     printConfigRow(ODD_EVEN_SETUP_LABEL, setupValueToString(current_configuration.measure_odd_even));
+    printConfigRow(VERIFY_LABEL, setupValueToString(current_configuration.verify_results));
     printf("\n");
     printConfigRow(INSTANCES_SETUP_LABEL, std::to_string(current_configuration.loaded_instances.size()).c_str());
     printf("\n");

@@ -20,10 +20,10 @@ int main()
         data::instance_t instance = current_configuration.loaded_instances.top();
         current_configuration.loaded_instances.pop();
 
-        data::results_t average_result(instance.sequence.size());
+        std::list<data::results_t> results_from_previous_repetitions;
 
         for (int repetition = 0; repetition < instance.repetitions; repetition++) {
-            data::results_t result(instance.sequence.size());
+            results_from_previous_repetitions.emplace_back(instance.sequence.size());
 
             if (current_configuration.measure_bitonic) {
                 data::solution_validation_data_t validation_data = measurement::measure_algorithm_for_instance(
@@ -31,8 +31,8 @@ int main()
                     sorting::CpuBitonicSort,
                     sorting::GpuBitonicSort,
                     current_configuration, 
-                    &result.cpu_bitonic_time_seconds,
-                    &result.gpu_bitonic_time_seconds
+                    &results_from_previous_repetitions.back().cpu_bitonic_time_seconds,
+                    &results_from_previous_repetitions.back().gpu_bitonic_time_seconds
                 );
 
                 if (validation_data.validation_code != data::SOLUTION_VALID) {
@@ -48,8 +48,8 @@ int main()
                     sorting::CpuOddEvenSort, 
                     sorting::GpuOddEvenSort,
                     current_configuration, 
-                    &result.cpu_odd_even_time_seconds,
-                    &result.gpu_odd_even_time_seconds
+                    &results_from_previous_repetitions.back().cpu_odd_even_time_seconds,
+                    &results_from_previous_repetitions.back().gpu_odd_even_time_seconds
                 );
                 
                 if (validation_data.validation_code != data::SOLUTION_VALID) {
@@ -59,13 +59,14 @@ int main()
                     return 200 + validation_data.validation_code;
                 }
             }
-            result_output.dumpResult(result);
-            
-            average_result += result;
+            result_output.dumpResult(results_from_previous_repetitions.back());
         }
 
-        average_result /= instance.repetitions;
-        result_output.printAverageResult(average_result);
+        result_output.printAverageResult(
+            data::results_t::calculateMeanAndStandardDeviation(
+                results_from_previous_repetitions, instance.sequence.size()
+            )
+        );
     }
 
     result_output.close();

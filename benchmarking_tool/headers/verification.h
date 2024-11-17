@@ -14,7 +14,7 @@ namespace verification {
      * @return `true` if solution is valid.
      * @return `false` if solution is not valid.
      */
-    bool solution_is_valid(data::instance_t solution);
+    bool solution_is_valid(data::instance_t solution, bool enable);
 }
 
 #endif

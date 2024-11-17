@@ -54,7 +54,7 @@ TEST(printNotification, printSomeString) {
 
 
 TEST(printConfigurationOutput, whenValidConfigLoadedThenPrintIt) {
-    config::configuration_t configuration(true, false, true, true);
+    config::configuration_t configuration(true, false, true, true, false);
     configuration.loaded_instances.emplace(data::instance_t({4, 6, 8}, 15));
     configuration.loaded_instances.emplace(data::instance_t({3, 1, 0}, 3));
     configuration.loaded_instances.emplace(data::instance_t({7, 1, 1}, 2));
@@ -103,9 +103,13 @@ TEST(ResultsOutputStream__printAverageResult, whenAllResultsPresentThenPrintTabl
     output::ResultsOutputStream& stream = output::ResultsOutputStream::getStream();
     data::results_t results(10);
     results.cpu_bitonic_time_seconds = 1.5;
+    results.cpu_bitonic_std_deviation = 1.5;
     results.gpu_bitonic_time_seconds = 2.4;
+    results.gpu_bitonic_std_deviation = 2.4;
     results.cpu_odd_even_time_seconds = 3.6;
+    results.cpu_odd_even_std_deviation = 3.6;
     results.gpu_odd_even_time_seconds = 4.5;
+    results.gpu_odd_even_std_deviation = 4.5;
     testing::internal::CaptureStdout();
 
     stream.open();
@@ -122,9 +126,13 @@ TEST(ResultsOutputStream__printAverageResult, whenSomeResultsPresentThenPrintTab
     output::ResultsOutputStream& stream = output::ResultsOutputStream::getStream();
     data::results_t results(10);
     results.cpu_bitonic_time_seconds = 1.5;
+    results.cpu_bitonic_std_deviation = 1.5;
     results.gpu_bitonic_time_seconds = data::MEASUREMENT_NOT_PERFORMED;
+    results.gpu_bitonic_std_deviation = data::MEASUREMENT_NOT_PERFORMED;
     results.cpu_odd_even_time_seconds = 3.6;
+    results.cpu_odd_even_std_deviation = 3.6;
     results.gpu_odd_even_time_seconds = data::MEASUREMENT_NOT_PERFORMED;
+    results.gpu_odd_even_std_deviation = data::MEASUREMENT_NOT_PERFORMED;
     testing::internal::CaptureStdout();
 
     stream.open();

@@ -24,7 +24,7 @@ namespace measurement {
      *  or with `data::SOLUTION_INVALID` verification code when solution is invalid.
      */
     data::solution_validation_data_t measure_implementation_for_instance(
-        const data::instance_t& instance, std::function<void(std::vector<int>&)> implementation, double* result_location
+        const data::instance_t& instance, std::function<void(std::vector<int>&)> implementation, double* result_location, bool validate
     );
 
 

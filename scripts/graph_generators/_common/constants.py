@@ -24,18 +24,18 @@ COLORS: dict[Implementation, str] = {
 
 
 TREND_LINES: dict[Implementation, Callable[[int], Decimal]] = {
-    "bitonic sort (CPU)": lambda size: Decimal(math.log2(size)) ** Decimal(2), 
-    "bitonic sort (GPU)": lambda size: Decimal(math.log2(size)) ** Decimal(2), 
-    "odd-even sort (CPU)": lambda size: Decimal(size),
-    "odd-event sort (GPU)": lambda size: Decimal(size)
+    "bitonic sort (CPU)": lambda size: Decimal(size), 
+    "bitonic sort (GPU)": lambda size: Decimal(size),
+    "odd-even sort (CPU)": lambda size: Decimal(size) ** 2,
+    "odd-event sort (GPU)": lambda size: Decimal(size) ** 2
 }
 
 
 TREND_LINES_NAMES: dict[Implementation, str] = {
-    "bitonic sort (CPU)": r"$\log^2(n)$", 
-    "bitonic sort (GPU)": r"$\log^2(n)$", 
-    "odd-even sort (CPU)": r"$n$", 
-    "odd-event sort (GPU)": r"$n$"
+    "bitonic sort (CPU)": r"$n$", 
+    "bitonic sort (GPU)": r"$n$", 
+    "odd-even sort (CPU)": r"$n^2$", 
+    "odd-event sort (GPU)": r"$n^2$"
 }
 
 

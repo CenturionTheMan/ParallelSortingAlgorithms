@@ -17,6 +17,7 @@ namespace testdata {
         "measure_gpu=1\n"
         "measure_bitonic=1\n"
         "measure_odd_even=1\n"
+        "verify=0\n"
         "\n"
         "random_instance=50000 10\n"
         "random_instance=10000000 56\n"
@@ -28,26 +29,34 @@ namespace testdata {
     const std::string CONFIG_FILE_WITH_NO_CPU_INFO =
         "measure_gpu=1\n"
         "measure_bitonic=1\n"
-        "measure_odd_even=1\n";
+        "measure_odd_even=1\n"
+        "verify=0\n";
 
 
     const std::string CONFIG_FILE_WITH_NO_GPU_INFO =
         "measure_bitonic=1\n"
         "measure_cpu=0\n"
-        "measure_odd_even=1\n";
+        "measure_odd_even=1\n"
+        "verify=0\n";
 
 
     const std::string CONFIG_FILE_WITH_NO_BITONIC_SORT_INFO =
         "measure_cpu=0\n"
         "measure_gpu=1\n"
-        "measure_odd_even=1\n";
+        "measure_odd_even=1\n"
+        "verify=0\n";
 
 
     const std::string CONFIG_FILE_WITH_NO_ODD_EVEN_SORT_INFO =
         "measure_cpu=0\n"
         "measure_gpu=1\n"
         "measure_bitonic=1\n";
-    
+
+    const std::string CONFIG_FILE_WITH_NO_VERIFY_INFO =
+        "measure_cpu=0\n"
+        "measure_gpu=1\n"
+        "measure_bitonic=1\n"
+        "measure_odd_even=1\n";
 
     const std::string PRINT_FOR_VALID_CONFIGURATION = 
         ">>> CONFIGURATION LOADED\n"
@@ -56,6 +65,7 @@ namespace testdata {
         "GPU measurement                 ON\n"
         "Bitonic Sort measurement        ON\n"
         "Odd-Even Sort measurement       ON\n"
+        "Verify                          OFF\n"
         "\n"
         "Defined instances               4\n"
         "\n";
@@ -98,7 +108,7 @@ namespace testdata {
     
 
     const std::string RESULT_FILE_HEADER =
-        "instance size;bitonic sort (CPU);bitonic sort (GPU);odd-even sort (CPU);odd-event sort (GPU)\n";
+        "instance size;mean bitonic sort (CPU);mean bitonic sort (GPU);mean odd-even sort (CPU);mean odd-event sort (GPU)\n";
 
     
     const std::string RESULTS_CSV_ALL_ENABLED =
@@ -115,21 +125,21 @@ namespace testdata {
     const std::string TABLE_HEADER =
         ">>> STARTING BENCHMARK...\n"
         "\n"
-        "#===============#=============#=============#==============#==============#\n"
-        "| Instance size | CPU Bitonic | GPU Bitonic | CPU Odd-Even | GPU Odd-Even |\n"
-        "#===============#=============#=============#==============#==============#\n";
+        "#===============#=========================#=========================#==========================#==========================#\n"
+        "| Instance size |       CPU Bitonic       |       GPU Bitonic       |       CPU Odd-Even       |       GPU Odd-Even       |\n"
+        "#===============#=========================#=========================#==========================#==========================#\n";
     
 
     const std::string TABLE_WITH_ALL_RESULTS =
         TABLE_HEADER +
-        "|            10 |  1.50e+00 s |  2.40e+00 s |   3.60e+00 s |   4.50e+00 s |\n"
-        "#===============#=============#=============#==============#==============#\n";
+        "|            10 |   1.50e+00 (1.50e+00) s |   2.40e+00 (2.40e+00) s |    3.60e+00 (3.60e+00) s |    4.50e+00 (4.50e+00) s |\n"
+        "#===============#=========================#=========================#==========================#==========================#\n";
 
     
     const std::string TABLE_WITH_PARTIAL_RESULTS =
         TABLE_HEADER +
-        "|            10 |  1.50e+00 s |             |   3.60e+00 s |              |\n"
-        "#===============#=============#=============#==============#==============#\n";
+        "|            10 |   1.50e+00 (1.50e+00) s |                         |    3.60e+00 (3.60e+00) s |                          |\n"
+        "#===============#=========================#=========================#==========================#==========================#\n";
 }
 
 #endif

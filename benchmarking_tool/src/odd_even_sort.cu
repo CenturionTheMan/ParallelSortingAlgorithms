@@ -5,56 +5,60 @@
 #include <thread>
 #include <vector>
 
-__global__ void OddEven(int* arr, int length) {
-	int globalId = blockIdx.x * blockDim.x + threadIdx.x;
-    int globalIndex = 2 * globalId;
+__global__ void Even(int* arr, int length) {
+    int index = 2 * (blockIdx.x * blockDim.x + threadIdx.x);
+    if (index >= length - 1) return;
 
-	if (globalIndex < length) //even
+	int current = arr[index];
+	int next = arr[index + 1];
+    
+	if (current > next)
 	{
-		int curr = arr[globalIndex];
-		int next = arr[globalIndex + 1];
-		if (curr > next)
-		{
-			arr[globalIndex] = next;
-			arr[globalIndex + 1] = curr;
-
-		}
+		arr[index] = next;
+		arr[index + 1] = current;
 	}
-	__syncthreads();
+}
 
-	if (globalIndex + 1 < length) //odd
-	{
-		int cur = arr[globalIndex + 1];
-		int next = arr[globalIndex + 2];
-		if (cur > next)
-		{
-			arr[globalIndex + 1] = next;
-			arr[globalIndex + 2] = cur;
-		}
-	}
-	__syncthreads();
+__global__ void Odd(int* arr, int length) {
+    int index = 2 * (blockIdx.x * blockDim.x + threadIdx.x) + 1;
+    if (index >= length - 1) return;
+
+    int current = arr[index];
+    int next = arr[index + 1];
+
+    if (current > next)
+    {
+        arr[index] = next;
+        arr[index + 1] = current;
+    }
 }
 
 
 void sorting::GpuOddEvenSort(std::vector<int>& arr)
 {
-    int* gpuArr;
-    cudaMalloc(&gpuArr, arr.size() * sizeof(int));
-    cudaMemcpy(gpuArr, arr.data(), arr.size() * sizeof(int), cudaMemcpyHostToDevice);
+    int half = arr.size() / 2;
+    int* deviceArr;
+    cudaMalloc(&deviceArr, arr.size() * sizeof(int));
+    cudaMemcpy(deviceArr, arr.data(), arr.size() * sizeof(int), cudaMemcpyHostToDevice);
 
-    int threads = 512;
+    const int threads = 128;
 
-    int blocks = (int)ceil(arr.size() / (double)threads);
+    int blocks = (int)ceil(half / (double)threads);
 
-    for (int i = 0; i < arr.size() / 2; i++)
+    cudaStream_t stream;
+    cudaStreamCreate(&stream);
+
+    for (int i = 0; i < half; i++)
     {
-        OddEven << <blocks, threads >> > (gpuArr, arr.size());
-        cudaDeviceSynchronize();
+        Even << <blocks, threads, 0, stream >> > (deviceArr, arr.size());
+        Odd << <blocks, threads, 0, stream >> > (deviceArr, arr.size());
     }
-    cudaMemcpy(arr.data(), gpuArr, arr.size() * sizeof(int), cudaMemcpyDeviceToHost);
+    cudaMemcpy(arr.data(), deviceArr, arr.size() * sizeof(int), cudaMemcpyDeviceToHost);
 
-    cudaFree(gpuArr);
+    cudaFree(deviceArr);
+    cudaStreamDestroy(stream);
 }
+
 
 void sorting::CpuOddEvenSort(std::vector<int>& arr)
 {

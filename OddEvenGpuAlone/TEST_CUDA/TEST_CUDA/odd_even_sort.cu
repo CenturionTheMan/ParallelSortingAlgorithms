@@ -9,26 +9,30 @@ __global__ void Even(int* arr, int length) {
     int index = 2 * (blockIdx.x * blockDim.x + threadIdx.x); //get global index
     if (index >= length - 1) return; //check if index is out of bounds
 
-    //compare and swap
-    if (arr[index] > arr[index + 1])
-    {
-        int tmp = arr[index];
-        arr[index] = arr[index + 1];
-        arr[index + 1] = tmp;
-    }
+	int current = arr[index];
+	int next = arr[index + 1];
+    
+	if (current > next)
+	{
+		arr[index] = next;
+		arr[index + 1] = current;
+	}
 }
 
 __global__ void Odd(int* arr, int length) {
     int index = 2 * (blockIdx.x * blockDim.x + threadIdx.x) + 1; //get global index
     if (index >= length - 1) return; //check if index is out of bounds
 
-    if (arr[index] > arr[index + 1])
+    int current = arr[index];
+    int next = arr[index + 1];
+
+    if (current > next)
     {
-        int tmp = arr[index];
-        arr[index] = arr[index + 1];
-        arr[index + 1] = tmp;
+        arr[index] = next;
+        arr[index + 1] = current;
     }
 }
+
 
 void sorting::GpuOddEvenSort(std::vector<int>& arr)
 {

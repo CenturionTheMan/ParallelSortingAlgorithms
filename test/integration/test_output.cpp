@@ -68,9 +68,13 @@ TEST(ResultsOutputStream__dumpResult, whenAllAlgorithmsAndSomeImplementationsDis
     output::ResultsOutputStream& output = output::ResultsOutputStream::getStream();
     data::results_t results(10);
     results.cpu_bitonic_time_seconds = 1.5;
+    results.cpu_bitonic_std_deviation = 1.0;
     results.gpu_bitonic_time_seconds = data::MEASUREMENT_NOT_PERFORMED;
+    results.gpu_bitonic_std_deviation = data::MEASUREMENT_NOT_PERFORMED;
     results.cpu_odd_even_time_seconds = 3.6;
+    results.cpu_odd_even_std_deviation = 1.0;
     results.gpu_odd_even_time_seconds = data::MEASUREMENT_NOT_PERFORMED;
+    results.gpu_odd_even_std_deviation = data::MEASUREMENT_NOT_PERFORMED;
 
     output.open();
     output.dumpResult(results);

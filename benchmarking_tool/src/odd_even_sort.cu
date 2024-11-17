@@ -241,7 +241,7 @@ void sorting::sortMT(std::vector<int>& arr) {
     const int k = arr.size() / threadsCount;
     int start = 0;
     std::mutex m;
-    std::thread group[threadsCount];
+    std::vector<std::thread> group(threadsCount);
     while (!sorted) {
         sorted = true;
         start = 0;

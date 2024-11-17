@@ -11,7 +11,7 @@ TEST(loadConfiguration, when_file_exist_then_load_configuration) {
     configuration_file << testdata::VALID_CONFIG_FILE_CONTENT;
     configuration_file.close();
 
-    config::configuration_t expected_config = config::configuration_t(true, false, true, true);
+    config::configuration_t expected_config = config::configuration_t(true, false, true, true, false);
     expected_config.loaded_instances.emplace(data::instance_t(std::list<int>(50000), 10));
     expected_config.loaded_instances.emplace(data::instance_t(std::list<int>(10000000), 56));
     expected_config.loaded_instances.emplace(data::instance_t(std::list<int>(199), 56));
@@ -169,6 +169,25 @@ TEST(loadConfiguration, when_file_has_no_odd_even_sort_info_then_print_error_mes
         testing::internal::GetCapturedStdout(),
         ">>> BENCHMARK TERMINATED!\n"
         ">>> ERROR: Configuration file misses \"measure_odd_even\"!\n"
+    );
+
+    std::remove("configuration.ini");
+}
+
+TEST(loadConfiguration, when_file_has_no_verify_info_then_print_error_message) {
+    std::fstream configuration_file("configuration.ini", std::ios::out);
+    configuration_file << testdata::CONFIG_FILE_WITH_NO_VERIFY_INFO;
+    configuration_file.close();
+    testing::internal::CaptureStdout();
+
+    try{
+        config::loadConfiguration();
+    } catch(const std::exception& e){}
+
+    EXPECT_EQ(
+        testing::internal::GetCapturedStdout(),
+        ">>> BENCHMARK TERMINATED!\n"
+        ">>> ERROR: Configuration file misses \"verify\"!\n"
     );
 
     std::remove("configuration.ini");

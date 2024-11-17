@@ -60,6 +60,7 @@ config::configuration_t config::loadConfiguration()
     std::pair<std::regex, bool> measure_cpu("measure_cpu\\s*=(0|1)\\s*", false);
     std::pair<std::regex, bool> measure_bitonic("measure_bitonic\\s*=\\s*(0|1)\\s*", false);
     std::pair<std::regex, bool> measure_odd_even("measure_odd_even\\s*=\\s*(0|1)\\s*", false);
+    std::pair<std::regex, bool> verify("verify\\s*=\\s*(0|1)\\s*", false);
     std::regex PREDEFINED_INSTANCE_LINE("predefined_instance\\s*=\\s*(\\d+)\\s+((?:-?\\d+\\s*)+)");
     std::regex RANDOM_INSTANCE_LINE("random_instance\\s*=\\s*(\\d+)\\s+(\\d+)");
 
@@ -83,6 +84,10 @@ config::configuration_t config::loadConfiguration()
             configuration.measure_odd_even = std::stoi(match[1]);
             measure_odd_even.second = true;
         }
+        else if (std::regex_search(line, match, verify.first)){
+            configuration.verify_results = std::stoi(match[1]);
+            verify.second = true;
+        }
         else if (std::regex_match(line, match, PREDEFINED_INSTANCE_LINE))
             configuration.loaded_instances.emplace(__loadPredefinedInstanceFromRegexMatch(match));
         else if (std::regex_match(line, match, RANDOM_INSTANCE_LINE))
@@ -94,6 +99,7 @@ config::configuration_t config::loadConfiguration()
     __checkRequiredOptionAndThrowErrorIfItIsNotLoaded(measure_odd_even, "measure_odd_even");
     __checkRequiredOptionAndThrowErrorIfItIsNotLoaded(measure_cpu, "measure_cpu");
     __checkRequiredOptionAndThrowErrorIfItIsNotLoaded(measure_gpu, "measure_gpu");
+    __checkRequiredOptionAndThrowErrorIfItIsNotLoaded(verify, "verify");
 
     return configuration;
 }

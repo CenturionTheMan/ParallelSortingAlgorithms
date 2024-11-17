@@ -44,22 +44,39 @@ namespace data{
 
 
     /**
-     *  @brief Execution times (in seconds) for each implementation and algorithm that were measured in a particular
-     *  repetition and for particular instance size. All times are set to `MEASUREMENT_NOT_PERFORMED` by default.
+     *  @brief Execution times and standard deviation (in seconds) for each implementation and algorithm that were 
+     *  measured in a particular repetition and for particular instance size. All times are set to 
+     *  `MEASUREMENT_NOT_PERFORMED` by default.
      */
     struct results_t
     {
         int instance_size;
-        double cpu_bitonic_time_seconds = 0;
-        double gpu_bitonic_time_seconds = 0;
-        double cpu_odd_even_time_seconds = 0;
-        double gpu_odd_even_time_seconds = 0;
+        double cpu_bitonic_time_seconds = MEASUREMENT_NOT_PERFORMED;
+        double cpu_bitonic_std_deviation = MEASUREMENT_NOT_PERFORMED;
+        double gpu_bitonic_time_seconds = MEASUREMENT_NOT_PERFORMED;
+        double gpu_bitonic_std_deviation = MEASUREMENT_NOT_PERFORMED;
+        double cpu_odd_even_time_seconds = MEASUREMENT_NOT_PERFORMED;
+        double cpu_odd_even_std_deviation = MEASUREMENT_NOT_PERFORMED;
+        double gpu_odd_even_time_seconds = MEASUREMENT_NOT_PERFORMED;
+        double gpu_odd_even_std_deviation = MEASUREMENT_NOT_PERFORMED;
 
         results_t(int instance_size):
             instance_size(instance_size){}
 
         results_t& operator+=(const results_t& other);
         results_t& operator/=(int n);
+
+        /**
+         * @brief Inserts standard deviation into the `average_results` structure.
+         * 
+         * @param results_from_repetitions Results from all repetitions.
+         * @param instance_size Instance size.
+         * 
+         * @return Average results for all repetitions along with standard derivation.
+         */
+        static results_t calculateMeanAndStandardDeviation(
+            std::list<data::results_t>& results_from_repetitions, int instance_size
+        );
     };
 
 

@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 3.18)
+
 if (UNIX)
     set(CMAKE_CUDA_COMPILER /usr/local/cuda/bin/nvcc)
 
     if(CMAKE_CUDA_COMPILER)
         enable_language(CUDA)
 
-        # to tell your code it was found via #ifdef USE_CUDA:
+        # To tell your code it was found via #ifdef USE_CUDA:
         add_definitions(-DUSE_CUDA)    
 
         include_directories("${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}")
@@ -13,10 +14,8 @@ if (UNIX)
 endif (UNIX)
 
 if (WIN32)
-
-find_package(CUDAToolkit)
-enable_language(CUDA)
-
+    find_package(CUDAToolkit)
+    enable_language(CUDA)
 endif (WIN32)
 
 project(benchmarking_tool LANGUAGES C CXX CUDA)
@@ -27,6 +26,22 @@ set(CMAKE_CUDA_ARCHITECTURES 60 61 75)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+if(MSVC)
+    set(CMAKE_CUDA_FLAGS_DEBUG "-G -O0")
+    set(CMAKE_CUDA_FLAGS_RELEASE "-O3 -use_fast_math -Xptxas=-O3,-v --gpu-architecture=sm_75")
+else()
+    set(CMAKE_CUDA_FLAGS_DEBUG "-G -O0")
+    set(CMAKE_CUDA_FLAGS_RELEASE "-O3 -use_fast_math -Xptxas=-O3,-v --gpu-architecture=sm_75 -lineinfo")
+endif()
+
+if(MSVC)
+    set(CMAKE_CXX_FLAGS_DEBUG "/Zi /Od")  
+    set(CMAKE_CXX_FLAGS_RELEASE "/O2 /DNDEBUG")
+else()
+    set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -march=native -funroll-loops")
+endif()
 
 file(
     GLOB SOURCES 
@@ -48,8 +63,6 @@ add_executable(benchmarking_tool ${SOURCES} "./benchmarking_tool/main.cpp")
 
 target_include_directories(benchmarking_tool PRIVATE benchmarking_tool/headers)
 set_target_properties(benchmarking_tool PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
 
 enable_testing()
 

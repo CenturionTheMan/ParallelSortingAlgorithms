@@ -1,6 +1,4 @@
 # Some trash
-*.sln
-*.vcxproj
 CMakeFiles/*
 .vscode/*
 .venv/*

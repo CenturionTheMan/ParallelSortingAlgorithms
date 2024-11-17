@@ -54,13 +54,9 @@ System saves measurement results for each repetition in an output file named `re
 
 1. Instance size (integer number)
 2. Execution time for *Bitonic Sort* implemented on CPU (real number with `.` decimal point or empty when measurement was disabled)
-3. Standard deviation for *Bitonic Sort* implemented on CPU (real number with `.` decimal point or empty when measurement was disabled)
-4. Execution time for *Bitonic Sort* implemented on GPU (real number with `.` decimal point or empty when measurement was disabled)
-5. Standard deviation for *Bitonic Sort* implemented on GPU (real number with `.` decimal point or empty when measurement was disabled)
-6. Execution time for *Odd-Even Sort* implemented on CPU (real number with `.` decimal point or empty when measurement was disabled)
-7. Standard deviation for *Odd-Even Sort* implemented on CPU (real number with `.` decimal point or empty when measurement was disabled)
-8. Execution time for *Odd-Even Sort* implemented on GPU (real number with `.` decimal point or empty when measurement was disabled)
-9. Standard deviation for *Odd-Even Sort* implemented on GPU (real number with `.` decimal point or empty when measurement was disabled)
+3. Execution time for *Bitonic Sort* implemented on GPU (real number with `.` decimal point or empty when measurement was disabled)
+4. Execution time for *Odd-Even Sort* implemented on CPU (real number with `.` decimal point or empty when measurement was disabled)
+5. Execution time for *Odd-Even Sort* implemented on GPU (real number with `.` decimal point or empty when measurement was disabled)
 
 What's more the header would be also saved to the first line of `result.csv`.
 

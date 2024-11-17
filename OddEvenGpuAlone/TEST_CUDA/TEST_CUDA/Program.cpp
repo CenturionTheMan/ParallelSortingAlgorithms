@@ -53,7 +53,7 @@ bool CheckValidity(const std::vector<int>& vec, int originalLen, int itearation)
 int main()
 {
 	std::cout << ">> Start\n";
-	const int size = 100;
+	const int size = 100000;
 	const int rep = 5;
 	double sumTime = 0.0;
 	for (int i = 0; i < rep; i++)

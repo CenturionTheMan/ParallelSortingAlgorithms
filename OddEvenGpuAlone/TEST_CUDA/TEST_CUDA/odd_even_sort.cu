@@ -5,39 +5,56 @@
 #include <thread>
 #include <vector>
 
-__global__ void OddEven(int* arr, int length, int phase) {
-	int globalId = blockIdx.x * blockDim.x + threadIdx.x;
-    int globalIndex = 2 * globalId + phase;
+__global__ void Even(int* arr, int length) {
+    int index = 2 * (blockIdx.x * blockDim.x + threadIdx.x); //get global index
+    if (index >= length - 1) return; //check if index is out of bounds
 
-	if (globalIndex < length)
-	{
-		int curr = arr[globalIndex];
-		int next = arr[globalIndex + 1];
-		if (curr > next)
-		{
-			arr[globalIndex] = next;
-			arr[globalIndex + 1] = curr;
-		}
-	}
+    //compare and swap
+    if (arr[index] > arr[index + 1])
+    {
+        int tmp = arr[index];
+        arr[index] = arr[index + 1];
+        arr[index + 1] = tmp;
+    }
 }
 
+__global__ void Odd(int* arr, int length) {
+    int index = 2 * (blockIdx.x * blockDim.x + threadIdx.x) + 1; //get global index
+    if (index >= length - 1) return; //check if index is out of bounds
+
+    if (arr[index] > arr[index + 1])
+    {
+        int tmp = arr[index];
+        arr[index] = arr[index + 1];
+        arr[index + 1] = tmp;
+    }
+}
 
 void sorting::GpuOddEvenSort(std::vector<int>& arr)
 {
-    int* gpuArr;
-    cudaMalloc(&gpuArr, arr.size() * sizeof(int));
-    cudaMemcpy(gpuArr, arr.data(), arr.size() * sizeof(int), cudaMemcpyHostToDevice);
+    int half = arr.size() / 2; //get half size of the array
+    int* deviceArr; //arr copy for gpu
+    cudaMalloc(&deviceArr, arr.size() * sizeof(int)); //allocate memory for d_arr
+    cudaMemcpy(deviceArr, arr.data(), arr.size() * sizeof(int), cudaMemcpyHostToDevice); //copy
 
-    int threads = 512;
+    int threads = 128; //threads per block (should be multiple of 32)
 
-    int blocks = (int)ceil(arr.size() / 2 / (double)threads);
+    //number of blocks. 
+    //half of array size is used because the odd and even idexes are handled at the same time
+    //this calculation guarantees that number of threads is enough to handle all elements
+    int blocks = (int)ceil(half / (double)threads);
 
-    for (int i = 0; i < arr.size(); i++)
+    cudaStream_t stream;
+    cudaStreamCreate(&stream);
+
+    //half iterations because we handle even and odd indexes at the same time
+    for (int i = 0; i < half; i++)
     {
-        OddEven << <blocks, threads >> > (gpuArr, arr.size(), i%2);
-        cudaDeviceSynchronize();
+        Even << <blocks, threads, 0, stream >> > (deviceArr, arr.size()); //handle even
+        Odd << <blocks, threads, 0, stream >> > (deviceArr, arr.size()); //handle odd
     }
-    cudaMemcpy(arr.data(), gpuArr, arr.size() * sizeof(int), cudaMemcpyDeviceToHost);
+    cudaMemcpy(arr.data(), deviceArr, arr.size() * sizeof(int), cudaMemcpyDeviceToHost); //copy back
 
-    cudaFree(gpuArr);
+    cudaFree(deviceArr); //free memory
+    cudaStreamDestroy(stream);
 }

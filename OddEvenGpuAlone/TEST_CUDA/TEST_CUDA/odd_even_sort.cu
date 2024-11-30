@@ -6,30 +6,61 @@
 #include <vector>
 
 __global__ void OddEven(int* arr, int length, int phase) {
-    int index = 2 * (blockIdx.x * blockDim.x + threadIdx.x) + phase; //get global index
-    if (index >= length - 1) return; //check if index is out of bounds
-
+    int index = 2 * (blockIdx.x * blockDim.x + threadIdx.x) + phase;
+    
+    if (index + 1 >= length) return;
 	int current = arr[index];
 	int next = arr[index + 1];
-    
 	if (current > next)
 	{
 		arr[index] = next;
 		arr[index + 1] = current;
 	}
+
+	/*if (index + 3 >= length) return;
+	int current2 = arr[index + 2];
+	int next2 = arr[index + 3];
+    if (current2 > next2)
+    {
+        arr[index + 2] = next2;
+        arr[index + 3] = current2;
+    }*/
 }
+
+int RoundUpToMultiple(int num, int multiple)
+{
+    return std::ceil(num / (float)multiple) * multiple;
+}
+
+void CalculateThreadsBlocksAmount(int& threads, int& blocks, int length)
+{
+    cudaDeviceProp deviceProp;
+    cudaGetDeviceProperties(&deviceProp, 0);
+    
+	const int threadsAmountMax = deviceProp.memoryBusWidth;
+    const int threadsAmountMin = 32;
+    const int blocksPerMultiMax = deviceProp.maxBlocksPerMultiProcessor;
+	const int multiMax = deviceProp.multiProcessorCount;
+
+    if (length > multiMax * blocksPerMultiMax * deviceProp.maxThreadsPerBlock)
+    {
+		throw std::runtime_error("Array is too big");
+    }
+
+    blocks = multiMax * blocksPerMultiMax;
+	threads = RoundUpToMultiple(length / blocks, threadsAmountMin);
+}
+
 
 
 void sorting::GpuOddEvenSort(std::vector<int>& arr)
 {
-    int* deviceArr; //arr copy for gpu
-    cudaMalloc(&deviceArr, arr.size() * sizeof(int)); //allocate memory for d_arr
-    cudaMemcpy(deviceArr, arr.data(), arr.size() * sizeof(int), cudaMemcpyHostToDevice); //copy
+    int* deviceArr;
+    cudaMalloc(&deviceArr, arr.size() * sizeof(int));
+    cudaMemcpy(deviceArr, arr.data(), arr.size() * sizeof(int), cudaMemcpyHostToDevice);
 
-	int dymThreadAmount = std::ceill(arr.size() / 32.0) * 32;
-	int threads = dymThreadAmount > 1024 ? 1024 : dymThreadAmount;
-
-    int blocks = (int)ceil(arr.size() / 2 / (double)threads);
+    int blocks, threads;
+	CalculateThreadsBlocksAmount(threads, blocks, std::ceill(arr.size() / 2.0));
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
@@ -38,8 +69,8 @@ void sorting::GpuOddEvenSort(std::vector<int>& arr)
     {
         OddEven << <blocks, threads, 0, stream >> > (deviceArr, arr.size(), i%2);
     }
-    cudaMemcpy(arr.data(), deviceArr, arr.size() * sizeof(int), cudaMemcpyDeviceToHost); //copy back
+    cudaMemcpy(arr.data(), deviceArr, arr.size() * sizeof(int), cudaMemcpyDeviceToHost);
 
-    cudaFree(deviceArr); //free memory
+    cudaFree(deviceArr);
     cudaStreamDestroy(stream);
 }

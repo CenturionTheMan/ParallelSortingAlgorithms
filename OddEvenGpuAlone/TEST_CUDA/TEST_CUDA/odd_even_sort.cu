@@ -16,15 +16,6 @@ __global__ void OddEven(int* arr, int length, int phase) {
 		arr[index] = next;
 		arr[index + 1] = current;
 	}
-
-	/*if (index + 3 >= length) return;
-	int current2 = arr[index + 2];
-	int next2 = arr[index + 3];
-    if (current2 > next2)
-    {
-        arr[index + 2] = next2;
-        arr[index + 3] = current2;
-    }*/
 }
 
 int RoundUpToMultiple(int num, int multiple)
@@ -37,7 +28,6 @@ void CalculateThreadsBlocksAmount(int& threads, int& blocks, int length)
     cudaDeviceProp deviceProp;
     cudaGetDeviceProperties(&deviceProp, 0);
     
-	const int threadsAmountMax = deviceProp.memoryBusWidth;
     const int threadsAmountMin = 32;
     const int blocksPerMultiMax = deviceProp.maxBlocksPerMultiProcessor;
 	const int multiMax = deviceProp.multiProcessorCount;

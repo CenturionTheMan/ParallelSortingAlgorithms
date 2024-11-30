@@ -54,7 +54,7 @@ int main()
 {
 	std::cout << ">> Start\n";
 	const int size = 100000;
-	const int rep = 10;
+	const int rep = 1;
 	double sumTime = 0.0;
 	for (int i = 0; i < rep; i++)
 	{

@@ -26,11 +26,8 @@ void sorting::GpuOddEvenSort(std::vector<int>& arr)
     cudaMalloc(&deviceArr, arr.size() * sizeof(int)); //allocate memory for d_arr
     cudaMemcpy(deviceArr, arr.data(), arr.size() * sizeof(int), cudaMemcpyHostToDevice); //copy
 
-
 	int dymThreadAmount = std::ceill(arr.size() / 32.0) * 32;
 	int threads = dymThreadAmount > 1024 ? 1024 : dymThreadAmount;
-
-
 
     int blocks = (int)ceil(arr.size() / 2 / (double)threads);
 

@@ -91,10 +91,8 @@ int main()
 	}
 	std::cout << ">> Average time: " << sumTime / rep << "s\n";
 
-	std::cin.get();
+	//std::cin.get();
 	
-	std::string str;
-	std::cin >> str;
     return 0;
 }
 

@@ -5,20 +5,47 @@
 #include <thread>
 #include <vector>
 
-__global__ void OddEven(int* arr, int length, int phase) {
-    int index = 2 * (blockIdx.x * blockDim.x + threadIdx.x) + phase;
-    
-    if (index + 1 >= length) return;
-	int current = arr[index];
-	int next = arr[index + 1];
-	if (current > next)
+__global__ void OddEven(int* arr, int length, int phase, int threadsAmount) {
+    extern __shared__ int sharedMem[];
+
+    int threadIndex = threadIdx.x;
+	int globalIndex = blockIdx.x * blockDim.x + threadIdx.x;
+	if (globalIndex + 1 >= length || (blockIdx.x != 0 && threadIndex == 0 && globalIndex % 2 != phase))
 	{
-		arr[index] = next;
-		arr[index + 1] = current;
+		return;
+	}
+    
+    sharedMem[threadIndex] = arr[globalIndex];
+
+    bool isBlockEdge = globalIndex % 2 == phase && (globalIndex + 2 >= length || threadIndex + 1 == threadsAmount);
+
+	if (isBlockEdge)
+	{
+		sharedMem[threadIndex + 1] = arr[globalIndex + 1];
+	}
+	__syncthreads();
+
+    if (globalIndex % 2 == phase)
+    {
+        int current = sharedMem[threadIndex];
+        int next = sharedMem[threadIndex + 1];
+        if (current > next)
+        {
+            sharedMem[threadIndex] = next;
+            sharedMem[threadIndex + 1] = current;
+        }
+    }
+    __syncthreads();
+
+
+    arr[globalIndex] = sharedMem[threadIndex];
+	if (isBlockEdge)
+	{
+		arr[globalIndex + 1] = sharedMem[threadIndex + 1];
 	}
 }
 
-int RoundUpToMultiple(int num, int multiple)
+int RoundUpToMultiple(float num, int multiple)
 {
     return std::ceil(num / (float)multiple) * multiple;
 }
@@ -38,7 +65,7 @@ void CalculateThreadsBlocksAmount(int& threads, int& blocks, int length)
     }
 
     blocks = multiMax * blocksPerMultiMax;
-	threads = RoundUpToMultiple(length / blocks, threadsAmountMin);
+	threads = length / (float)blocks < threadsAmountMin ? threadsAmountMin : RoundUpToMultiple(length / (float)blocks, threadsAmountMin);
 }
 
 
@@ -50,14 +77,16 @@ void sorting::GpuOddEvenSort(std::vector<int>& arr)
     cudaMemcpy(deviceArr, arr.data(), arr.size() * sizeof(int), cudaMemcpyHostToDevice);
 
     int blocks, threads;
-	CalculateThreadsBlocksAmount(threads, blocks, std::ceill(arr.size() / 2.0));
+	CalculateThreadsBlocksAmount(threads, blocks, arr.size());
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
 
+	int sharedMemorySize = (threads+1) * sizeof(int);
+
     for (int i = 0; i < arr.size(); i++)
     {
-        OddEven << <blocks, threads, 0, stream >> > (deviceArr, arr.size(), i%2);
+        OddEven << <blocks, threads, sharedMemorySize, stream >> > (deviceArr, arr.size(), i%2, threads);
     }
     cudaMemcpy(arr.data(), deviceArr, arr.size() * sizeof(int), cudaMemcpyDeviceToHost);
 

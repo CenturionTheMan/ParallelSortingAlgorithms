@@ -5,53 +5,88 @@
 #include <thread>
 #include <vector>
 
-__global__ void Even(int* arr, int length) {
-    int index = 2 * (blockIdx.x * blockDim.x + threadIdx.x);
-    if (index >= length - 1) return;
+__global__ void OddEven(int* arr, int length, int phase, int threadsAmount) {
+    extern __shared__ int sharedMem[];
 
-	int current = arr[index];
-	int next = arr[index + 1];
-    
-	if (current > next)
+    int threadIndex = threadIdx.x;
+	int globalIndex = blockIdx.x * blockDim.x + threadIdx.x;
+	if (globalIndex + 1 >= length || (blockIdx.x != 0 && threadIndex == 0 && globalIndex % 2 != phase))
 	{
-		arr[index] = next;
-		arr[index + 1] = current;
+		return;
+	}
+    
+    sharedMem[threadIndex] = arr[globalIndex];
+
+    bool isBlockEdge = globalIndex % 2 == phase && (globalIndex + 2 >= length || threadIndex + 1 == threadsAmount);
+
+	if (isBlockEdge)
+	{
+		sharedMem[threadIndex + 1] = arr[globalIndex + 1];
+	}
+	__syncthreads();
+
+    if (globalIndex % 2 == phase)
+    {
+        int current = sharedMem[threadIndex];
+        int next = sharedMem[threadIndex + 1];
+        if (current > next)
+        {
+            sharedMem[threadIndex] = next;
+            sharedMem[threadIndex + 1] = current;
+        }
+    }
+    __syncthreads();
+
+
+    arr[globalIndex] = sharedMem[threadIndex];
+	if (isBlockEdge)
+	{
+		arr[globalIndex + 1] = sharedMem[threadIndex + 1];
 	}
 }
 
-__global__ void Odd(int* arr, int length) {
-    int index = 2 * (blockIdx.x * blockDim.x + threadIdx.x) + 1;
-    if (index >= length - 1) return;
+int RoundUpToMultiple(float num, int multiple)
+{
+    return std::ceil(num / (float)multiple) * multiple;
+}
 
-    int current = arr[index];
-    int next = arr[index + 1];
+void CalculateThreadsBlocksAmount(int& threads, int& blocks, int length)
+{
+    cudaDeviceProp deviceProp;
+    cudaGetDeviceProperties(&deviceProp, 0);
+    
+    const int threadsAmountMin = deviceProp.warpSize;
+    const int blocksPerMultiMax = deviceProp.maxBlocksPerMultiProcessor;
+	const int multiMax = deviceProp.multiProcessorCount;
+    const int maxThresPerBlock = deviceProp.maxThreadsPerBlock;
 
-    if (current > next)
+    blocks = multiMax * blocksPerMultiMax;
+    threads = length / (float)blocks < threadsAmountMin ? threadsAmountMin : RoundUpToMultiple(length / (float)blocks, threadsAmountMin);
+
+    if (threads > maxThresPerBlock)
     {
-        arr[index] = next;
-        arr[index + 1] = current;
+        threads = maxThresPerBlock;
+        blocks = std::ceill(length / (float)threads);
     }
 }
 
-
 void sorting::GpuOddEvenSort(std::vector<int>& arr)
 {
-    int half = arr.size() / 2;
     int* deviceArr;
     cudaMalloc(&deviceArr, arr.size() * sizeof(int));
     cudaMemcpy(deviceArr, arr.data(), arr.size() * sizeof(int), cudaMemcpyHostToDevice);
 
-    const int threads = 128;
-
-    int blocks = (int)ceil(half / (double)threads);
+    int blocks, threads;
+	CalculateThreadsBlocksAmount(threads, blocks, arr.size());
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);
 
-    for (int i = 0; i < half; i++)
+	int sharedMemorySize = (threads+1) * sizeof(int);
+
+    for (int i = 0; i < arr.size(); i++)
     {
-        Even << <blocks, threads, 0, stream >> > (deviceArr, arr.size());
-        Odd << <blocks, threads, 0, stream >> > (deviceArr, arr.size());
+        OddEven << <blocks, threads, sharedMemorySize, stream >> > (deviceArr, arr.size(), i%2, threads);
     }
     cudaMemcpy(arr.data(), deviceArr, arr.size() * sizeof(int), cudaMemcpyDeviceToHost);
 

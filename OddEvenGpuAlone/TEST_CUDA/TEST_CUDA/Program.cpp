@@ -53,39 +53,11 @@ bool CheckValidity(std::vector<int>& vecOriginal, const std::vector<int>& vec, i
 	std::cout << "[OK] (" << itearation << ")\n";
 }
 
-//bool CheckValidity(const std::vector<int>& vec, int originalLen, int itearation)
-//{
-//	if (originalLen != vec.size())
-//	{
-//		std::cout << "[WRONG] (" << itearation << "): ";
-//		std::cout << "Size is not the same\n";
-//		return false;
-//	}
-//
-//	bool isSorted = true;
-//	for (int i = 0; i < vec.size() - 1; i++)
-//	{
-//		if (vec[i] > vec[i + 1])
-//		{
-//			std::cout << "[WRONG] (" << itearation << " | " << i << "): ";
-//			std::cout << vec[i-1] << ", " << vec[i] << ", " << vec[i+1] << "\n";
-//
-//			isSorted = false;
-//		}
-//	}
-//
-//	if (isSorted)
-//	{
-//		std::cout << "[OK] (" << itearation << ")\n";
-//	}
-//
-//	return isSorted;
-//}
 
 int main()
 {
 	std::cout << ">> Start\n";
-	const int size = 100000;
+	const int size = 200000;
 	const int rep = 10;
 	double sumTime = 0.0;
 	for (int i = 0; i < rep; i++)

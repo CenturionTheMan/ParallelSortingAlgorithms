@@ -6,8 +6,8 @@
 #include <vector>
 
 __global__ void OddEven(int* arr, int length, int phase) {
-    int index = 2 * (blockIdx.x * blockDim.x + threadIdx.x) + phase; //get global index
-    if (index >= length - 1) return; //check if index is out of bounds
+    int index = 2 * (blockIdx.x * blockDim.x + threadIdx.x) + phase;
+    if (index >= length - 1) return;
 
     int current = arr[index];
     int next = arr[index + 1];

@@ -29,17 +29,19 @@ void CalculateThreadsBlocksAmount(int& threads, int& blocks, int length)
     cudaDeviceProp deviceProp;
     cudaGetDeviceProperties(&deviceProp, 0);
 
-    const int threadsAmountMin = 32;
+    const int threadsAmountMin = deviceProp.warpSize;
     const int blocksPerMultiMax = deviceProp.maxBlocksPerMultiProcessor;
     const int multiMax = deviceProp.multiProcessorCount;
-
-    if (length > multiMax * blocksPerMultiMax * deviceProp.maxThreadsPerBlock)
-    {
-        throw std::runtime_error("Array is too big");
-    }
+	const int maxThresPerBlock = deviceProp.maxThreadsPerBlock;
 
     blocks = multiMax * blocksPerMultiMax;
     threads = length / (float)blocks < threadsAmountMin ? threadsAmountMin : RoundUpToMultiple(length / (float)blocks, threadsAmountMin);
+
+	if (threads > maxThresPerBlock)
+	{
+		threads = maxThresPerBlock;
+		blocks = std::ceill(length / (float)threads);
+	}
 }
 
 void sorting::GpuOddEvenSort(std::vector<int>& arr)

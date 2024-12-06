@@ -51,7 +51,7 @@ void sorting::GpuOddEvenSort(std::vector<int>& arr)
     cudaMemcpy(deviceArr, arr.data(), arr.size() * sizeof(int), cudaMemcpyHostToDevice);
 
     int blocks, threads;
-    CalculateThreadsBlocksAmount(threads, blocks, arr.size());
+    CalculateThreadsBlocksAmount(threads, blocks, std::ceill(arr.size() / 2.0));
 
     cudaStream_t stream;
     cudaStreamCreate(&stream);

@@ -180,7 +180,7 @@ void sorting::newSortJoin(std::vector<int>& arr) {
 }
 
 inline void compareMT(std::vector<int>& arr, const int startPoint, const int endPoint, std::mutex& m, bool& sorted) {
-    const int oddEnd = std::min(endPoint + 1, int(arr.size()));
+    const int oddEnd = std::min(endPoint + 1, int(arr.size() - 1));
 
     while (true) {
         bool needsLock = false;
@@ -219,6 +219,23 @@ inline void compareMT(std::vector<int>& arr, const int startPoint, const int end
                     else {
                         needsLock = true;
                     }
+                }
+            }
+        }
+
+        if (arr[oddEnd - 1] > arr[oddEnd]) {
+            std::swap(arr[oddEnd - 1], arr[oddEnd]);
+
+            if (!swapped) {
+                std::unique_lock<std::mutex> lock(m, std::defer_lock);
+                
+                if (lock.try_lock()) {
+                    sorted = false;
+                    swapped = true;
+                    needsLock = false;
+                }
+                else {
+                    needsLock = true;
                 }
             }
         }

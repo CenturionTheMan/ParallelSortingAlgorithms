@@ -186,6 +186,30 @@ inline void compareMT(std::vector<int>& arr, const int startPoint, const int end
         bool needsLock = false;
         bool swapped = false;
 
+        // Check endings first
+        {
+            std::unique_lock<std::mutex> lock(m, std::defer_lock);
+
+            lock.lock();
+            if (arr[oddEnd - 1] > arr[oddEnd]) {
+                std::swap(arr[oddEnd - 1], arr[oddEnd]);
+
+                sorted = false;
+                swapped = true;
+            }
+            if (arr[startPoint] > arr[startPoint + 1]) {
+                std::swap(arr[startPoint], arr[startPoint + 1]);
+                sorted = false;
+                swapped = true;
+            }
+            if (arr[startPoint + 1] > arr[startPoint + 2]) {
+                std::swap(arr[startPoint + 1], arr[startPoint + 2]);
+                sorted = false;
+                swapped = true;
+            }
+            lock.unlock();
+        }
+
         for (int i = startPoint + 1; i < oddEnd; i += 2) {
             // Odd
             if (arr[i] > arr[i + 1]) {
@@ -223,29 +247,11 @@ inline void compareMT(std::vector<int>& arr, const int startPoint, const int end
             }
         }
 
-        if (arr[oddEnd - 1] > arr[oddEnd]) {
-            std::swap(arr[oddEnd - 1], arr[oddEnd]);
-
-            if (!swapped) {
-                std::unique_lock<std::mutex> lock(m, std::defer_lock);
-                
-                if (lock.try_lock()) {
-                    sorted = false;
-                    swapped = true;
-                    needsLock = false;
-                }
-                else {
-                    needsLock = true;
-                }
-            }
-        }
-
         if (needsLock) {
             std::unique_lock<std::mutex> lock(m);
 
             sorted = false;
             swapped = true;
-
         }
 
         if (!swapped) break;

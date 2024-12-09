@@ -18,11 +18,6 @@ namespace sorting
 
 	void CpuOddEvenSort(std::vector<int>& arr);
 
-	void oldSort(std::vector<int>& arr);
-	void newSortJoin(std::vector<int>& arr);
-
-	void sortMT(std::vector<int>& arr);
-
 	// https://stackoverflow.com/questions/26516683/reusing-thread-in-loop-c
 	class ThreadPool
 	{
